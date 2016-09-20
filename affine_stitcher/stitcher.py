@@ -10,34 +10,51 @@ draw_params = dict(matchColor=(0, 255, 0),
 
 log = getLogger(__name__)
 
+
 class Stitcher(object):
 
     def __init__(self):
         # cached the homography
         self.cached_homo = None
-    def __call__(self, images, drawMatches=False):
+
+    def __call__(self, images, drawMatches=False, overlap=None):
 
         # get the images
-        (right_img, left_img) = images
-        if self.cached_homo is None:
-            (left_kps, left_ds) = self.get_keypoints_and_descriptors(left_img)
-            (right_kps, right_ds) = self.get_keypoints_and_descriptors(right_img)
-            log.debug('#left_kps = {}'.format(len(left_kps)))
-            log.debug('#right_kps = {}'.format(len(right_kps)))
-            (homo, mask, good) = self.match_features(left_kps, right_kps, left_ds, right_ds)
+        (left_img, right_img) = images
 
+        if self.cached_homo is None:
+            if overlap is not None:
+                left_mask = np.zeros(left_img.shape[:2], np.uint8)
+                left_mask[:, left_img.shape[1] - overlap:] = 255
+                right_mask = np.zeros(right_img.shape[:2], np.uint8)
+                right_mask[:, :overlap] = 255
+            else:
+                left_mask = None
+                right_mask = None
+            (left_kps, left_ds, left_features) = self.get_keypoints_and_descriptors(
+                left_img, left_mask, True)
+            (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
+                right_img, right_mask, True)
+            cv2.imshow('left', np.concatenate(
+                (left_features, right_features), axis=1))
+            cv2.waitKey(500)
+            log.debug('#left_kps = {} | #right_kps = {}'.format(
+                len(left_kps), len(right_kps)))
+            # (homo, mask, good) = self.get_best_3_matches(left_kps, right_kps, left_ds, right_ds)
+            # return None
+
+            (homo, mask, good) = self.match_features(left_kps, right_kps, left_ds, right_ds)
             if homo is None:
                 return None
 
             self.cached_homo = homo
             log.debug(self.cached_homo)
-            result = cv2.warpPerspective(
-                left_img, self.cached_homo, (left_img.shape[1] + right_img.shape[1], left_img.shape[0]))
-            result[0:right_img.shape[0], 0:right_img.shape[1]] = right_img
+            result = self.warp_images(left_img, right_img)
 
             if drawMatches:
                 matchesMask = mask.ravel().tolist()
-                result_matches = cv2.drawMatches(left_img, left_kps, right_img, right_kps, good,matchesMask=matchesMask,**draw_params)
+                result_matches = cv2.drawMatches(
+                    left_img, left_kps, right_img, right_kps, good, matchesMask=matchesMask, **draw_params)
                 return (result, result_matches)
 
             return result
@@ -61,15 +78,37 @@ class Stitcher(object):
         return (kps, ds)
 
     def match_features(self, left_kps, right_kps, left_ds, right_ds):
+        log.debug('test')
         bf = cv2.BFMatcher()
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
-        log.debug('#left_kps = {}'.format(len(left_kps)))
-        log.debug('#right_kps = {}'.format(len(right_kps)))
+        log.debug('#left_kps = {} | #right_kps = {}'.format(
+            len(left_kps), len(right_kps)))
         log.debug('#raw_matches = {}'.format(len(raw_matches)))
         left_pts, right_pts, good = helpers.lowe_ratio_test(
             left_kps, right_kps, raw_matches)
         if len(left_pts) > 3:
             (homo, mask) = cv2.findHomography(
-                left_pts, right_pts, cv2.RANSAC, 10.0)
+                right_pts, left_pts, cv2.RANSAC, 10.0)
+            log.debug('homo mask shape = {}'.format(mask.shape))
             return (homo, mask, good)
         return None
+
+    def get_best_3_matches(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):
+        bf = cv2.BFMatcher()
+        raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
+        left_pts, right_pts, better = helpers.lowe_ratio_test_affine(
+            left_kps, right_kps, raw_matches)
+        if len(left_pts) > 2:
+            affine = cv2.getAffineTransform(left_pts, right_pts)
+            affine = cv2.invertAffineTransform(affine)
+            affine = np.vstack([affine, [0, 0, 1]])
+            mask = np.array([[1],[1],[1]])
+            log.debug('affine mask shape = {}'.format(mask.shape))
+            return (affine, mask, better)
+        return None
+
+    def warp_images(self, left_img, right_img):
+        result = cv2.warpPerspective(
+            right_img, self.cached_homo, (left_img.shape[1] + right_img.shape[1], left_img.shape[0]))
+        result[0:left_img.shape[0], 0:left_img.shape[1]] = left_img
+        return result
