@@ -42,7 +42,7 @@ class Stitcher(object):
 
             return result
 
-    def get_keypoints_and_descriptors(self, img, mask=None):
+    def get_keypoints_and_descriptors(self, img, mask=None, drawMatches=False):
         # TODO Überprüfen was besser ist als grauers Bild oder ob es egal ist.
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -53,6 +53,10 @@ class Stitcher(object):
         surf.setExtended(128)
 
         kps, ds = surf.detectAndCompute(img_gray, mask)
+
+        if drawMatches:
+            marked_matches = cv2.drawKeypoints(img, kps, None, (0, 0, 255), 4)
+            return (kps, ds, marked_matches)
 
         return (kps, ds)
 
