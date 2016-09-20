@@ -17,7 +17,7 @@ class Stitcher(object):
         # cached the homography
         self.cached_homo = None
 
-    def __call__(self, images, drawMatches=False, overlap=None):
+    def __call__(self, images, drawMatches=False, overlap=None, affine=True):
 
         # get the images
         (left_img, right_img) = images
@@ -35,15 +35,21 @@ class Stitcher(object):
                 left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
                 right_img, right_mask, True)
-            cv2.imshow('left', np.concatenate(
-                (left_features, right_features), axis=1))
+
+            left_h, left_w = np.concatenate(
+                (left_features, right_features), axis=1).shape[:2]
+            sh = 800
+            sw = int(left_w * sh / left_h)
+            sm = cv2.resize(np.concatenate(
+                (left_features, right_features), axis=1), (sw, sh))
+            cv2.imshow('left', sm)
             cv2.waitKey(500)
             log.debug('#left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
-            # (homo, mask, good) = self.get_best_3_matches(left_kps, right_kps, left_ds, right_ds)
-            # return None
-
-            (homo, mask, good) = self.match_features(left_kps, right_kps, left_ds, right_ds)
+            if affine:
+                (homo, mask, good) = self.get_best_3_matches(left_kps, right_kps, left_ds, right_ds)
+            else:
+                (homo, mask, good) = self.match_features(left_kps, right_kps, left_ds, right_ds)
             if homo is None:
                 return None
 
@@ -65,9 +71,9 @@ class Stitcher(object):
 
         # TODO opencv versions check
 
-        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=300, nOctaves=3)
-        surf.setUpright(False)
-        surf.setExtended(128)
+        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=10, nOctaves=4)
+        surf.setUpright(True)
+        surf.setExtended(64)
 
         kps, ds = surf.detectAndCompute(img_gray, mask)
 

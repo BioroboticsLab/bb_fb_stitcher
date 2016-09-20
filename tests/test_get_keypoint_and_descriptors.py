@@ -20,8 +20,10 @@ def display(im,title='image', jupyter=False):
         cv2.waitKey(0)
 
 logging.config.fileConfig('logging_config.ini')
-img_l = cv2.imread('data/ferris_1.png')
-img_r = cv2.imread('data/ferris_2.png')
+# img_l = cv2.imread('data/ferris_1.png')
+# img_r = cv2.imread('data/ferris_2.png')
+img_l = cv2.imread('data/Cam_0_rect.jpg')
+img_r = cv2.imread('data/Cam_1_rect.jpg')
 # cv2.imshow('test',img_l)
 # cv2.waitKey(0)
 st = affine_stitcher.stitcher.Stitcher()

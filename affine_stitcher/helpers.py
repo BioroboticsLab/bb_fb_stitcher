@@ -32,3 +32,18 @@ def lowe_ratio_test_affine(kps1, kps2, matches, ratio = 0.75):
     log.debug('#pts1 = {}'.format(len(pts1)))
     log.debug('#pts2 = {}'.format(len(pts2)))
     return pts1, pts2, best
+
+def display(im,title='image', jupyter=False):
+    if jupyter:
+        plt.figure(figsize=(20, 20))
+        im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        plt.imshow(im)
+        plt.title(title)
+        plt.show()
+    else:
+        left_h, left_w = im.shape[:2]
+        sh = 800
+        sw = int(left_w * sh / left_h)
+        sm = cv2.resize(im, (sw, sh))
+        cv2.imshow(title, sm)
+        cv2.waitKey(0)
