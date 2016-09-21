@@ -31,30 +31,30 @@ class Stitcher(object):
             else:
                 left_mask = None
                 right_mask = None
+            log.info('Start searching for features.')
             (left_kps, left_ds, left_features) = self.get_keypoints_and_descriptors(
                 left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
                 right_img, right_mask, True)
-
-            left_h, left_w = np.concatenate(
-                (left_features, right_features), axis=1).shape[:2]
-            sh = 800
-            sw = int(left_w * sh / left_h)
-            sm = cv2.resize(np.concatenate(
-                (left_features, right_features), axis=1), (sw, sh))
-            cv2.imshow('left', sm)
-            cv2.waitKey(500)
-            log.debug('#left_kps = {} | #right_kps = {}'.format(
+            helpers.display(left_features)
+            log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
             if affine:
                 (homo, mask, good) = self.get_best_3_matches(left_kps, right_kps, left_ds, right_ds)
             else:
                 (homo, mask, good) = self.match_features(left_kps, right_kps, left_ds, right_ds)
             if homo is None:
+                log.warning('No Transformation matrix found.')
                 return None
-
+            log.info('Transformation matrix found.')
+            log.debug('mask length = {}'.format(len(mask)))
+            log.debug('good length = {}'.format(len(good)))
+            log.debug('good = {}'.format(good[:5]))
+            log.debug('mask = {}'.format(mask[:5]))
+            for i, val in enumerate(good[:20]):
+                log.debug('{}. queryIdx: {} trainIdx: {} dist: {}'.format(i,val.queryIdx, val.trainIdx, val.distance))
             self.cached_homo = homo
-            log.debug(self.cached_homo)
+            log.debug('TM =\n{}'.format(self.cached_homo))
             result = self.warp_images(left_img, right_img)
 
             if drawMatches:
@@ -71,10 +71,9 @@ class Stitcher(object):
 
         # TODO opencv versions check
 
-        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=10, nOctaves=4)
+        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=400, nOctaves=4)
         surf.setUpright(True)
         surf.setExtended(64)
-
         kps, ds = surf.detectAndCompute(img_gray, mask)
 
         if drawMatches:
@@ -84,32 +83,34 @@ class Stitcher(object):
         return (kps, ds)
 
     def match_features(self, left_kps, right_kps, left_ds, right_ds):
-        log.debug('test')
         bf = cv2.BFMatcher()
+        log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
-        log.debug('#left_kps = {} | #right_kps = {}'.format(
-            len(left_kps), len(right_kps)))
-        log.debug('#raw_matches = {}'.format(len(raw_matches)))
+        log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
         left_pts, right_pts, good = helpers.lowe_ratio_test(
             left_kps, right_kps, raw_matches)
+        log.debug('# Filtered Features = {}'.format(len(good)))
         if len(left_pts) > 3:
+            log.info('Start finding homography.')
             (homo, mask) = cv2.findHomography(
                 right_pts, left_pts, cv2.RANSAC, 10.0)
-            log.debug('homo mask shape = {}'.format(mask.shape))
             return (homo, mask, good)
         return None
 
     def get_best_3_matches(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):
         bf = cv2.BFMatcher()
+        log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
+        log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
         left_pts, right_pts, better = helpers.lowe_ratio_test_affine(
             left_kps, right_kps, raw_matches)
+        log.debug('# Filtered Features = {}'.format(len(better)))
         if len(left_pts) > 2:
+            log.info('Start finding affine transformation matrix.')
             affine = cv2.getAffineTransform(left_pts, right_pts)
             affine = cv2.invertAffineTransform(affine)
             affine = np.vstack([affine, [0, 0, 1]])
             mask = np.array([[1],[1],[1]])
-            log.debug('affine mask shape = {}'.format(mask.shape))
             return (affine, mask, better)
         return None
 

@@ -20,19 +20,15 @@ def display(im,title='image', jupyter=False):
         cv2.waitKey(0)
 
 logging.config.fileConfig('logging_config.ini')
-# img_l = cv2.imread('data/ferris_1.png')
-# img_r = cv2.imread('data/ferris_2.png')
-img_l = cv2.imread('data/Cam_0_rect.jpg')
-img_r = cv2.imread('data/Cam_1_rect.jpg')
+# img_l = cv2.imread('data/Cam_0_20160715130847_631282.jpg')
+# img_r = cv2.imread('data/Cam_1_20160715130847_631282.jpg')
+img_l = cv2.imread('data/ferris_1.png')
+img_r = cv2.imread('data/ferris_2.png')
+# img_l = cv2.imread('data/Cam_0_rect.jpg')
+# img_r = cv2.imread('data/Cam_1_rect.jpg')
 # cv2.imshow('test',img_l)
 # cv2.waitKey(0)
 st = affine_stitcher.stitcher.Stitcher()
-h,w = img_l.shape[:2]
-
-mask = np.zeros((h,w), np.uint8)
-# mask[:1000,:2000]=None
-mask[:]=255
-# print(mask[:10,:10])
 result, vis = st((img_l, img_r), True, 1000)
 
 display(result, 'result')
