@@ -46,10 +46,6 @@ def calculate_num_matches(mask):
             i += 1
     return i
 
-
-
-
-
 def display(im,title='image'):
     left_h, left_w = im.shape[:2]
     sh = 800
