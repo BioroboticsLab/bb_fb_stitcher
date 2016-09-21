@@ -46,10 +46,32 @@ def calculate_num_matches(mask):
             i += 1
     return i
 
-def display(im,title='image'):
+def display(im,title='image', time=0):
     left_h, left_w = im.shape[:2]
     sh = 800
     sw = int(left_w * sh / left_h)
     sm = cv2.resize(im, (sw, sh))
     cv2.imshow(title, sm)
-    cv2.waitKey(500)
+    cv2.waitKey(0)
+
+def subtract_foreground(cap, display=False):
+    fgbg = cv2.createBackgroundSubtractorMOG2()
+
+    while (1):
+        ret, frame = cap.read()
+
+        if ret == True:
+            fgmask = fgbg.apply(frame)
+            bgimg = fgbg.getBackgroundImage()
+
+            if display:
+                cv2.namedWindow('img', cv2.WINDOW_NORMAL)
+                cv2.resizeWindow('img', 800, 600)
+                cv2.imshow('img', bgimg)
+                k = cv2.waitKey(1) & 0xff
+                if k == 27:
+                    break
+        else:
+            break
+
+    return bgimg
