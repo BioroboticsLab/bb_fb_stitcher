@@ -17,7 +17,7 @@ class Stitcher(object):
         # cached the homography
         self.cached_homo = None
 
-    def __call__(self, images, drawMatches=False, overlap=None, affine=True):
+    def __call__(self, images, drawMatches=False, overlap=None, affine=False):
 
         # get the images
         (left_img, right_img) = images
@@ -47,12 +47,6 @@ class Stitcher(object):
                 log.warning('No Transformation matrix found.')
                 return None
             log.info('Transformation matrix found.')
-            log.debug('mask length = {}'.format(len(mask)))
-            log.debug('good length = {}'.format(len(good)))
-            log.debug('good = {}'.format(good[:5]))
-            log.debug('mask = {}'.format(mask[:5]))
-            for i, val in enumerate(good[:20]):
-                log.debug('{}. queryIdx: {} trainIdx: {} dist: {}'.format(i,val.queryIdx, val.trainIdx, val.distance))
             self.cached_homo = homo
             log.debug('TM =\n{}'.format(self.cached_homo))
             result = self.warp_images(left_img, right_img)

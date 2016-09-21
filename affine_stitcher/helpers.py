@@ -24,15 +24,24 @@ def lowe_ratio_test_affine(kps1, kps2, matches, ratio = 0.75):
         if len(m) == 2 and m[0].distance < ratio*m[1].distance:
             good.append(m[0])
     best = sorted(good, key=lambda x: x.distance)[:3]
-    pts1 = np.float32([kps1[b.queryIdx].pt for b in best]).reshape(-1, 1, 2)
-    pts2 = np.float32([kps2[b.trainIdx].pt for b in best]).reshape(-1, 1, 2)
+    pts1 = np.float32([kps1[b.queryIdx].pt for b in best[:3]]).reshape(-1, 1, 2)
+    pts2 = np.float32([kps2[b.trainIdx].pt for b in best[:3]]).reshape(-1, 1, 2)
     return pts1, pts2, best
 
-def get_Top_matches(kps1, kps2, matchesMask, head):
-    better = []
-    for i, val in enumerate(matchesMask):
-        if val == 1:
-            better.append(val)
+def get_mask_matches(matches, mask):
+    good_matches = []
+    for i, m in enumerate(matches):
+        if mask[i] ==1:
+            good_matches.append(m)
+    return good_matches
+
+def calculate_num_matches(mask):
+    i = 0
+    for m in mask:
+        if m ==1:
+            i += 1
+    return i
+
 
 def display(im,title='image'):
     left_h, left_w = im.shape[:2]
