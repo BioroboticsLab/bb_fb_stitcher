@@ -36,13 +36,12 @@ class Stitcher(object):
                 left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
                 right_img, right_mask, True)
-            helpers.display(left_features)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
             if affine:
-                (homo, mask, good_matches) = self.get_best_3_matches(left_kps, right_kps, left_ds, right_ds)
+                (homo, mask_good, good_matches) = self.match_features_and_affine(left_kps, right_kps, left_ds, right_ds)
             else:
-                (homo, mask, good_matches) = self.match_features(left_kps, right_kps, left_ds, right_ds)
+                (homo, mask_good, good_matches) = self.match_features(left_kps, right_kps, left_ds, right_ds)
             if homo is None:
                 log.warning('No Transformation matrix found.')
                 return None
@@ -52,7 +51,7 @@ class Stitcher(object):
             result = self.warp_images(left_img, right_img)
 
             if drawMatches:
-                matchesMask = mask.ravel().tolist()
+                matchesMask = mask_good.ravel().tolist()
                 result_matches = cv2.drawMatches(
                     left_img, left_kps, right_img, right_kps, good_matches, matchesMask=matchesMask, **draw_params)
                 return (result, result_matches)
@@ -65,9 +64,9 @@ class Stitcher(object):
 
         # TODO opencv versions check
 
-        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=400, nOctaves=4)
+        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=10, nOctaves=4)
         surf.setUpright(True)
-        surf.setExtended(64)
+        surf.setExtended(128)
         kps, ds = surf.detectAndCompute(img_gray, mask)
 
         if drawMatches:
@@ -87,7 +86,7 @@ class Stitcher(object):
         if len(left_pts) > 3:
             log.info('Start finding homography.')
             (homo, mask_good) = cv2.findHomography(
-                right_pts, left_pts, cv2.RANSAC, 10.0)
+                right_pts, left_pts, cv2.RANSAC, 2.0)
             return (homo, mask_good, good_matches)
         return None
 
@@ -104,11 +103,27 @@ class Stitcher(object):
             affine = cv2.getAffineTransform(left_pts, right_pts)
             affine = cv2.invertAffineTransform(affine)
             affine = np.vstack([affine, [0, 0, 1]])
-            mask_better = np.array([[1],[1],[1]])
+            mask_better = np.ones((3, 1))
             return (affine, mask_better, better_matches)
         return None
 
-    # def match_features_and_affine:
+    def match_features_and_affine(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):
+        (homo, mask_good, good_matches) = self.match_features(left_kps, right_kps, left_ds, right_ds)
+        if good_matches is None:
+            log.warning('No homography matrix for further steps found.')
+            return None
+        better_matches = helpers.get_mask_matches(good_matches, mask_good)
+        left_pts, right_pts, top_matches = helpers.get_top_matches(
+            left_kps, right_kps, better_matches, 3)
+        mask_top = np.ones((3, 1))
+        if len(left_pts) > 2:
+            log.info('Start finding affine transformation matrix.')
+            affine = cv2.getAffineTransform(left_pts, right_pts)
+            affine = cv2.invertAffineTransform(affine)
+            affine = np.vstack([affine, [0, 0, 1]])
+            mask_top = np.ones((3, 1))
+            return (affine, mask_top, top_matches)
+        return None
 
     def warp_images(self, left_img, right_img):
         result = cv2.warpPerspective(

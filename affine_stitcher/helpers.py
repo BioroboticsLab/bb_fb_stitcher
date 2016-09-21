@@ -42,6 +42,12 @@ def calculate_num_matches(mask):
             i += 1
     return i
 
+def get_top_matches(kps1, kps2, matches, num):
+    top_matches = sorted(matches, key = lambda m:m.distance)[:num]
+    pts1 = np.float32([kps1[b.queryIdx].pt for b in top_matches]).reshape(-1, 1, 2)
+    pts2 = np.float32([kps2[b.trainIdx].pt for b in top_matches]).reshape(-1, 1, 2)
+    return pts1, pts2, top_matches
+
 
 def display(im,title='image'):
     left_h, left_w = im.shape[:2]
