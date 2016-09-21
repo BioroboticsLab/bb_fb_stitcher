@@ -5,7 +5,7 @@ from logging import getLogger
 log = getLogger(__name__)
 
 class Rectificator(object):
-    def __init__(self, intrinsic_mat=config.intr_m, distorion_coeff=config.dist_c):
+    def __init__(self, intrinsic_mat=config.INTR_M, distorion_coeff=config.DIST_C):
         self.intr_m = intrinsic_mat
         self.dist_c = distorion_coeff
         self.cached_new_cam_mat = None
