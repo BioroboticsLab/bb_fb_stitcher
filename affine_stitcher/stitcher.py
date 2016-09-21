@@ -86,9 +86,9 @@ class Stitcher(object):
         log.debug('# Filtered Features = {}'.format(len(good_matches)))
         if len(left_pts) > 3:
             log.info('Start finding homography.')
-            (homo, mask) = cv2.findHomography(
+            (homo, mask_good) = cv2.findHomography(
                 right_pts, left_pts, cv2.RANSAC, 10.0)
-            return (homo, mask, good_matches)
+            return (homo, mask_good, good_matches)
         return None
 
     def get_best_3_matches(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):
@@ -96,17 +96,19 @@ class Stitcher(object):
         log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
         log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
-        left_pts, right_pts, better = helpers.lowe_ratio_test_affine(
+        left_pts, right_pts, better_matches = helpers.lowe_ratio_test_affine(
             left_kps, right_kps, raw_matches)
-        log.debug('# Filtered Features = {}'.format(len(better)))
+        log.debug('# Filtered Features = {}'.format(len(better_matches)))
         if len(left_pts) > 2:
             log.info('Start finding affine transformation matrix.')
             affine = cv2.getAffineTransform(left_pts, right_pts)
             affine = cv2.invertAffineTransform(affine)
             affine = np.vstack([affine, [0, 0, 1]])
-            mask = np.array([[1],[1],[1]])
-            return (affine, mask, better)
+            mask_better = np.array([[1],[1],[1]])
+            return (affine, mask_better, better_matches)
         return None
+
+    # def match_features_and_affine:
 
     def warp_images(self, left_img, right_img):
         result = cv2.warpPerspective(
