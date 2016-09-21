@@ -13,21 +13,23 @@ log = getLogger(__name__)
 
 class Stitcher(object):
 
-    def __init__(self):
+    def __init__(self, overlap=None, affine = True):
         # cached the homography
         self.cached_homo = None
+        self.overlap = overlap
+        self.affine = affine
 
-    def __call__(self, images, drawMatches=False, overlap=None, affine=True):
+    def __call__(self, images, drawMatches=False):
 
         # get the images
         (left_img, right_img) = images
 
         if self.cached_homo is None:
-            if overlap is not None:
+            if self.overlap is not None:
                 left_mask = np.zeros(left_img.shape[:2], np.uint8)
-                left_mask[:, left_img.shape[1] - overlap:] = 255
+                left_mask[:, left_img.shape[1] - self.overlap:] = 255
                 right_mask = np.zeros(right_img.shape[:2], np.uint8)
-                right_mask[:, :overlap] = 255
+                right_mask[:, :self.overlap] = 255
             else:
                 left_mask = None
                 right_mask = None
@@ -38,7 +40,7 @@ class Stitcher(object):
                 right_img, right_mask, True)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
-            if affine:
+            if self.affine:
                 (homo, mask_good, good_matches) = self.match_features_and_affine(left_kps, right_kps, left_ds, right_ds)
             else:
                 (homo, mask_good, good_matches) = self.match_features(left_kps, right_kps, left_ds, right_ds)
@@ -47,16 +49,17 @@ class Stitcher(object):
                 return None
             log.info('Transformation matrix found.')
             self.cached_homo = homo
-            log.debug('TM =\n{}'.format(self.cached_homo))
-            result = self.warp_images(left_img, right_img)
 
-            if drawMatches:
-                matchesMask = mask_good.ravel().tolist()
-                result_matches = cv2.drawMatches(
-                    left_img, left_kps, right_img, right_kps, good_matches, matchesMask=matchesMask, **draw_params)
-                return (result, result_matches)
+        log.debug('TM =\n{}'.format(self.cached_homo))
+        result = self.warp_images(left_img, right_img)
 
-            return result
+        if drawMatches:
+            matchesMask = mask_good.ravel().tolist()
+            result_matches = cv2.drawMatches(
+                left_img, left_kps, right_img, right_kps, good_matches, matchesMask=matchesMask, **draw_params)
+            return (self.cached_homo, result, result_matches)
+
+        return self.cached_homo, result
 
     def get_keypoints_and_descriptors(self, img, mask=None, drawMatches=False):
         # TODO Überprüfen was besser ist als grauers Bild oder ob es egal ist.
@@ -80,7 +83,7 @@ class Stitcher(object):
         log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
         log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
-        left_pts, right_pts, good_matches = helpers.lowe_ratio_test(
+        left_pts, right_pts, good_matches = helpers.get_points_n_matches(
             left_kps, right_kps, raw_matches)
         log.debug('# Filtered Features = {}'.format(len(good_matches)))
         if len(left_pts) > 3:
@@ -95,7 +98,7 @@ class Stitcher(object):
         log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
         log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
-        left_pts, right_pts, better_matches = helpers.lowe_ratio_test_affine(
+        left_pts, right_pts, better_matches = helpers.get_points_n_matches_affine(
             left_kps, right_kps, raw_matches)
         log.debug('# Filtered Features = {}'.format(len(better_matches)))
         if len(left_pts) > 2:

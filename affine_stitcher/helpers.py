@@ -4,29 +4,33 @@ import cv2
 
 log = getLogger(__name__)
 
-def lowe_ratio_test(kps1, kps2, matches, ratio = 0.75):
-    kps1_impr = []
-    kps2_impr = []
+def lowe_ratio_test(matches, ratio = 0.75):
     good_matches = []
     for m in matches:
         if len(m) == 2 and m[0].distance < ratio*m[1].distance:
             m = m[0]
-            kps1_impr.append(kps1[m.queryIdx])
-            kps2_impr.append(kps2[m.trainIdx])
             good_matches.append(m)
-    pts1 = np.float32([kp.pt for kp in kps1_impr])
-    pts2 = np.float32([kp.pt for kp in kps2_impr])
+    return good_matches
+
+def get_matching_points(kps1, kps2, matches):
+    pts1 = np.float32([kps1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+    pts2 = np.float32([kps2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    return pts1, pts2
+
+def get_top_matches(kps1, kps2, matches, num=None):
+    top_matches = sorted(matches, key = lambda m:m.distance)[:num]
+    pts1, pts2 = get_matching_points(kps1, kps2, top_matches)
+    return pts1, pts2, top_matches
+
+def get_points_n_matches(kps1, kps2, matches, ratio = 0.75):
+    good_matches = lowe_ratio_test(matches, ratio)
+    pts1, pts2 = get_matching_points(kps1, kps2, good_matches)
     return pts1, pts2, good_matches
 
-def lowe_ratio_test_affine(kps1, kps2, matches, ratio = 0.75):
-    good_matches = []
-    for m in matches:
-        if len(m) == 2 and m[0].distance < ratio*m[1].distance:
-            good_matches.append(m[0])
-    best = sorted(good_matches, key=lambda x: x.distance)[:3]
-    pts1 = np.float32([kps1[b.queryIdx].pt for b in best[:3]]).reshape(-1, 1, 2)
-    pts2 = np.float32([kps2[b.trainIdx].pt for b in best[:3]]).reshape(-1, 1, 2)
-    return pts1, pts2, best
+def get_points_n_matches_affine(kps1, kps2, matches, ratio = 0.75):
+    good_matches = lowe_ratio_test(matches, ratio)
+    pts1, pts2, best_matches = get_top_matches(kps1, kps2, good_matches, 3)
+    return pts1, pts2, best_matches
 
 def get_mask_matches(matches, mask):
     good_matches = []
@@ -42,11 +46,8 @@ def calculate_num_matches(mask):
             i += 1
     return i
 
-def get_top_matches(kps1, kps2, matches, num):
-    top_matches = sorted(matches, key = lambda m:m.distance)[:num]
-    pts1 = np.float32([kps1[b.queryIdx].pt for b in top_matches]).reshape(-1, 1, 2)
-    pts2 = np.float32([kps2[b.trainIdx].pt for b in top_matches]).reshape(-1, 1, 2)
-    return pts1, pts2, top_matches
+
+
 
 
 def display(im,title='image'):
