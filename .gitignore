@@ -87,3 +87,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Test Output folders
+*/Output/*
+tests/data/misc/
+
+# special files
+test_masks_on_imgs.py
+*.mkv
