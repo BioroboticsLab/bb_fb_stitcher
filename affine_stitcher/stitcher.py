@@ -17,7 +17,7 @@ class Stitcher(object):
         # cached the homography
         self.cached_homo = None
 
-    def __call__(self, images, drawMatches=False, overlap=None, affine=False):
+    def __call__(self, images, drawMatches=False, overlap=None, affine=True):
 
         # get the images
         (left_img, right_img) = images
@@ -40,9 +40,9 @@ class Stitcher(object):
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
             if affine:
-                (homo, mask, good) = self.get_best_3_matches(left_kps, right_kps, left_ds, right_ds)
+                (homo, mask, good_matches) = self.get_best_3_matches(left_kps, right_kps, left_ds, right_ds)
             else:
-                (homo, mask, good) = self.match_features(left_kps, right_kps, left_ds, right_ds)
+                (homo, mask, good_matches) = self.match_features(left_kps, right_kps, left_ds, right_ds)
             if homo is None:
                 log.warning('No Transformation matrix found.')
                 return None
@@ -54,7 +54,7 @@ class Stitcher(object):
             if drawMatches:
                 matchesMask = mask.ravel().tolist()
                 result_matches = cv2.drawMatches(
-                    left_img, left_kps, right_img, right_kps, good, matchesMask=matchesMask, **draw_params)
+                    left_img, left_kps, right_img, right_kps, good_matches, matchesMask=matchesMask, **draw_params)
                 return (result, result_matches)
 
             return result
@@ -81,14 +81,14 @@ class Stitcher(object):
         log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
         log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
-        left_pts, right_pts, good = helpers.lowe_ratio_test(
+        left_pts, right_pts, good_matches = helpers.lowe_ratio_test(
             left_kps, right_kps, raw_matches)
-        log.debug('# Filtered Features = {}'.format(len(good)))
+        log.debug('# Filtered Features = {}'.format(len(good_matches)))
         if len(left_pts) > 3:
             log.info('Start finding homography.')
             (homo, mask) = cv2.findHomography(
                 right_pts, left_pts, cv2.RANSAC, 10.0)
-            return (homo, mask, good)
+            return (homo, mask, good_matches)
         return None
 
     def get_best_3_matches(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):

@@ -7,23 +7,23 @@ log = getLogger(__name__)
 def lowe_ratio_test(kps1, kps2, matches, ratio = 0.75):
     kps1_impr = []
     kps2_impr = []
-    good = []
+    good_matches = []
     for m in matches:
         if len(m) == 2 and m[0].distance < ratio*m[1].distance:
             m = m[0]
             kps1_impr.append(kps1[m.queryIdx])
             kps2_impr.append(kps2[m.trainIdx])
-            good.append(m)
+            good_matches.append(m)
     pts1 = np.float32([kp.pt for kp in kps1_impr])
     pts2 = np.float32([kp.pt for kp in kps2_impr])
-    return pts1, pts2, good
+    return pts1, pts2, good_matches
 
 def lowe_ratio_test_affine(kps1, kps2, matches, ratio = 0.75):
-    good = []
+    good_matches = []
     for m in matches:
         if len(m) == 2 and m[0].distance < ratio*m[1].distance:
-            good.append(m[0])
-    best = sorted(good, key=lambda x: x.distance)[:3]
+            good_matches.append(m[0])
+    best = sorted(good_matches, key=lambda x: x.distance)[:3]
     pts1 = np.float32([kps1[b.queryIdx].pt for b in best[:3]]).reshape(-1, 1, 2)
     pts2 = np.float32([kps2[b.trainIdx].pt for b in best[:3]]).reshape(-1, 1, 2)
     return pts1, pts2, best
