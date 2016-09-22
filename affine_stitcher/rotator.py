@@ -64,9 +64,20 @@ class Rotator(object):
         return self.affine_mat
 
     def rotate_image(self, image, angle):
-        if self.affine_mat is None or self.size_new is None or self.shape != image.shape[:2] or self.angle != angle:
+        not_cached = self.affine_mat is None or self.size_new
+        changed_val = self.shape != image.shape[:2] or self.angle != angle
+        if not_cached or changed_val:
             self.__get_affine_mat(image.shape[:2], angle)
         return cv2.warpPerspective(image, self.affine_mat, self.size_new)
 
-    def rotate_points(self, pts):
+    def rotate_points(self, pts, angle=None, shape=None):
+        if shape is None:
+            shape = self.shape
+        if angle is None:
+            angle = self.angle
+
+        not_cached = self.affine_mat is None or self.size_new
+        changed_val = self.shape != shape or self.angle != angle
+        if not_cached or changed_val:
+            self.__get_affine_mat(shape, angle)
         return cv2.transform(pts, self.affine_mat[0:2])
