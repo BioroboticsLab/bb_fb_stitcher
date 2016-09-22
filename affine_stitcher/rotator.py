@@ -1,0 +1,72 @@
+from logging import getLogger
+import numpy as np
+import cv2
+
+log = getLogger(__name__)
+
+
+class Rotator(object):
+
+    def __init__(self, shape=None, angle=None):
+        self.shape = shape
+        self.angle = angle
+        self.roation_mat = None
+        self.size_new = None
+        self.affine_mat = None
+        if shape is not None and angle is not None:
+            self.__get_affine_mat(shape, angle)
+
+    def __get_affine_mat(self, shape, angle):
+        self.angle = angle
+        self.shape = shape
+        log.info('Start searching roation_mat.')
+        # Get img size
+        size = (shape[1], shape[0])
+        w, h = size
+        center = tuple(np.array(size) / 2.0)
+        (width_half, height_half) = center
+
+        # Convert the 3x2 rotation matrix to 3x3 ''homography''
+        self.roation_mat = np.vstack([cv2.getRotationMatrix2D(center, angle, 1.0),
+                                      [0, 0, 1]])
+
+        # To get just the rotation
+        rot_matrix_2x2 = self.roation_mat[:2, :2]
+
+        # Declare the corners of the image in relation to the center
+        corners = np.array([
+            [-width_half, height_half],
+            [width_half, height_half],
+            [-width_half, -height_half],
+            [width_half, -height_half]
+        ])
+
+        # get the rotated corners
+        corners_rotated = corners.dot(rot_matrix_2x2)
+        corners_rotated = np.array(corners_rotated, np.float32)
+
+        # get the rectangle which would surround the rotated image
+        __, __, w, h = cv2.boundingRect(np.array(corners_rotated))
+
+        self.size_new = (w, h)
+        log.debug('size_new = {}'.format(self.size_new))
+
+        # matrix to center the rotated image
+        translation_matrix = np.array([
+            [1, 0, int(w / 2 - width_half)],
+            [0, 1, int(h / 2 - height_half)],
+            [0, 0, 1]
+        ])
+
+        # get the affine Matrix
+        self.affine_mat = translation_matrix.dot(self.roation_mat)
+        log.debug('affine_mat = \n{}'.format(self.affine_mat))
+        return self.affine_mat
+
+    def rotate_image(self, image, angle):
+        if self.affine_mat is None or self.size_new is None or self.shape != image.shape[:2] or self.angle != angle:
+            self.__get_affine_mat(image.shape[:2], angle)
+        return cv2.warpPerspective(image, self.affine_mat, self.size_new)
+
+    def rotate_points(self, pts):
+        return cv2.transform(pts, self.affine_mat[0:2])

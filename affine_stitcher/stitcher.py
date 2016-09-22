@@ -121,6 +121,7 @@ class Stitcher(object):
         mask_top = np.ones((3, 1))
         if len(left_pts) > 2:
             log.info('Start finding affine transformation matrix.')
+            # TODO affine andere bezeichnung ändern überschneidet sich mit Bool affine
             affine = cv2.getAffineTransform(left_pts, right_pts)
             affine = cv2.invertAffineTransform(affine)
             affine = np.vstack([affine, [0, 0, 1]])
