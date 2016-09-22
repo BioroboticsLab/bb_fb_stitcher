@@ -64,7 +64,7 @@ class Rotator(object):
         return self.affine_mat
 
     def rotate_image(self, image, angle):
-        not_cached = self.affine_mat is None or self.size_new
+        not_cached = self.affine_mat is None or self.size_new is None
         changed_val = self.shape != image.shape[:2] or self.angle != angle
         if not_cached or changed_val:
             self.__get_affine_mat(image.shape[:2], angle)
@@ -76,7 +76,7 @@ class Rotator(object):
         if angle is None:
             angle = self.angle
 
-        not_cached = self.affine_mat is None or self.size_new
+        not_cached = self.affine_mat is None or self.size_new is None
         changed_val = self.shape != shape or self.angle != angle
         if not_cached or changed_val:
             self.__get_affine_mat(shape, angle)
