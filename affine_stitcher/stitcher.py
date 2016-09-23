@@ -19,11 +19,11 @@ class Transformation(Enum):
 
 class FeatureBasedStitcher(object):
 
-    def __init__(self, overlap=None, affine = True):
+    def __init__(self, overlap=None, transformation = Transformation.AFFINE):
         # cached the homography
         self.cached_homo = None
         self.overlap = overlap
-        self.affine = affine
+        self.transformation = transformation
 
     def __call__(self, images, drawMatches=False):
 
@@ -46,10 +46,12 @@ class FeatureBasedStitcher(object):
                 right_img, right_mask, True)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
-            if self.affine:
+            if self.transformation == Transformation.AFFINE:
                 (homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
-            else:
+            elif self.transformation == Transformation.PROJECTIVE:
                 (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
+            elif self.transformation == Transformation.EUCLIDEAN:
+                (homo, mask_good, good_matches) = self.transform_euclidean(left_kps, right_kps, left_ds, right_ds)
             if homo is None:
                 log.warning('No Transformation matrix found.')
                 return None
@@ -131,8 +133,31 @@ class FeatureBasedStitcher(object):
             affine = cv2.getAffineTransform(left_pts, right_pts)
             affine = cv2.invertAffineTransform(affine)
             affine = np.vstack([affine, [0, 0, 1]])
-            mask_top = np.ones((3, 1))
             return (affine, mask_top, top_matches)
+        return None
+
+    def transform_euclidean(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):
+        (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
+        if good_matches is None:
+            log.warning('No homography matrix for further steps found.')
+            return None
+        better_matches = helpers.get_mask_matches(good_matches, mask_good)
+        left_pts, right_pts, top_matches = helpers.get_top_matches(
+            left_kps, right_kps, better_matches, 3)
+        mask_top = np.ones((3,1))
+        if len(left_pts) >= 1:
+            log.info('Start finding euclidean transformation matrix.')
+            log.debug('left_pts ={}'.format(left_pts[0][0]))
+            log.debug('right_pts ={}'.format(right_pts))
+            tr_vec = np.subtract(left_pts[1][0], right_pts[1][0])
+            log.debug('translation_vector{}'.format(tr_vec))
+            euclidean = np.array([
+                [1, 0, tr_vec[0]], #x
+                [0, 1, tr_vec[1]], #y
+                [0, 0, 1]
+            ], np.float64)
+            log.debug(type(euclidean[0][0]))
+            return (euclidean, mask_top, top_matches)
         return None
 
     def warp_images(self, left_img, right_img):
