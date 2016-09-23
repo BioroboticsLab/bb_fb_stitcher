@@ -2,6 +2,7 @@ import affine_stitcher.helpers as helpers
 import numpy as np
 import cv2
 from logging import getLogger
+from enum import Enum
 
 draw_params = dict(matchColor=(0, 255, 0),
                    outImg=None,
@@ -10,6 +11,11 @@ draw_params = dict(matchColor=(0, 255, 0),
 
 log = getLogger(__name__)
 
+class Transformation(Enum):
+    EUCLIDEAN = 0
+    SIMILARITY = 1
+    AFFINE = 2
+    PROJECTIVE = 3
 
 class FeatureBasedStitcher(object):
 
@@ -134,3 +140,4 @@ class FeatureBasedStitcher(object):
             right_img, self.cached_homo, (left_img.shape[1] + right_img.shape[1], left_img.shape[0]))
         result[0:left_img.shape[0], 0:left_img.shape[1]] = left_img
         return result
+
