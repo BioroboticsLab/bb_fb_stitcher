@@ -52,7 +52,7 @@ def display(im,title='image', time=0):
     sw = int(left_w * sh / left_h)
     sm = cv2.resize(im, (sw, sh))
     cv2.imshow(title, sm)
-    cv2.waitKey(0)
+    cv2.waitKey(time)
 
 def subtract_foreground(cap, display=False):
     fgbg = cv2.createBackgroundSubtractorMOG2()
