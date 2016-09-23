@@ -8,15 +8,15 @@ setup(
     version='0.0.0.dev1',
     description='Stitch images from different cam positions, with an afffine transformation',
     long_description='',
-    # entry_points={
-    #     'console_scripts': [
-    #         'bb_composer = composer.scripts.bb_composer:main'
-    #     ]
-    # },
+    entry_points={
+        'console_scripts': [
+            'bb_fg_subtract = affine_stitcher.scripts.bb_fg_subtract:main'
+        ]
+    },
     url='https://github.com/gitmirgut/bb_affine_stitcher',
     author='gitmirgut',
     author_email="gitmirgut@users.noreply.github.com",
-    packages=['affine_stitcher'],
+    packages=['affine_stitcher', 'affine_stitcher.scripts'],
     install_requires=install_reqs,
     dependency_links=dep_links,
     license='GNU GPLv3',
