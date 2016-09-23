@@ -41,9 +41,9 @@ class FeatureBasedStitcher(object):
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
             if self.affine:
-                (homo, mask_good, good_matches) = self.match_features_and_affine(left_kps, right_kps, left_ds, right_ds)
+                (homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
             else:
-                (homo, mask_good, good_matches) = self.match_features(left_kps, right_kps, left_ds, right_ds)
+                (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
             if homo is None:
                 log.warning('No Transformation matrix found.')
                 return None
@@ -78,7 +78,7 @@ class FeatureBasedStitcher(object):
 
         return (kps, ds)
 
-    def match_features(self, left_kps, right_kps, left_ds, right_ds):
+    def transform_projective(self, left_kps, right_kps, left_ds, right_ds):
         bf = cv2.BFMatcher()
         log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
@@ -110,8 +110,8 @@ class FeatureBasedStitcher(object):
             return (affine, mask_better, better_matches)
         return None
 
-    def match_features_and_affine(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):
-        (homo, mask_good, good_matches) = self.match_features(left_kps, right_kps, left_ds, right_ds)
+    def transform_affine(self, left_kps, right_kps, left_ds, right_ds, drawMatches=False):
+        (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
         if good_matches is None:
             log.warning('No homography matrix for further steps found.')
             return None
