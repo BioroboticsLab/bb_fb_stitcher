@@ -21,7 +21,7 @@ class BB_FeatureBasedSticher(object):
         img_r_ro = ro.rotate_image(img_r_re, -90)
         helpers.display(img_l_ro, 'img_l_ro')
         helpers.display(img_r_ro, 'img_r_ro')
-        st =  stitch.FeatureBasedStitcher(overlap=400, border=500, transformation=Transformation.EUCLIDEAN)
+        st =  stitch.FeatureBasedStitcher(overlap=400, border=500, transformation=Transformation.AFFINE)
         homo, result, vis = st((img_l_ro, img_r_ro), True)
         helpers.display(vis)
         return result

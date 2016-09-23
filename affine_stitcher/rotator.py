@@ -22,7 +22,6 @@ class Rotator(object):
         log.info('Start searching roation_mat.')
         # Get img size
         size = (shape[1], shape[0])
-        w, h = size
         center = tuple(np.array(size) / 2.0)
         (width_half, height_half) = center
 

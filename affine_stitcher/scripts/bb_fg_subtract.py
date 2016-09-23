@@ -3,6 +3,7 @@ import argparse
 import os
 import cv2
 
+
 def process_videos(args):
     # getting the filename without .extension
     basename = os.path.basename(args.video_path)
@@ -13,15 +14,16 @@ def process_videos(args):
 
     # getting background image
     cap = cv2.VideoCapture(args.video_path)
-    background = helpers.subtract_foreground(cap, display=True)
+    background = helpers.subtract_foreground(cap, show=True)
     cap.release()
 
     cv2.imwrite(filename + ext, background)
 
+
 def main():
     parser = argparse.ArgumentParser(
         prog='BeesBook foreground subtractor.',
-        description='This will remove the moving objects of an video and' \
+        description='This will remove the moving objects of an video and'
                     'return an image of the background.'
     )
 
