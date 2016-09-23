@@ -71,6 +71,7 @@ class Rotator(object):
         return cv2.warpPerspective(image, self.affine_mat, self.size_new)
 
     def rotate_points(self, pts, angle=None, shape=None):
+        log.debug('Start rotate points.')
         if shape is None:
             shape = self.shape
         if angle is None:
