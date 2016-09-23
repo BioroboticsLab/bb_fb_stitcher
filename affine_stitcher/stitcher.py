@@ -11,7 +11,7 @@ draw_params = dict(matchColor=(0, 255, 0),
 log = getLogger(__name__)
 
 
-class Stitcher(object):
+class FeatureBasedStitcher(object):
 
     def __init__(self, overlap=None, affine = True):
         # cached the homography
