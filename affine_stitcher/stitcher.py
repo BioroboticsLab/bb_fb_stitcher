@@ -19,10 +19,11 @@ class Transformation(Enum):
 
 class FeatureBasedStitcher(object):
 
-    def __init__(self, overlap=None, transformation = Transformation.AFFINE):
+    def __init__(self, overlap=None, border=None, transformation = Transformation.AFFINE):
         # cached the homography
         self.cached_homo = None
         self.overlap = overlap
+        self.border = border
         self.transformation = transformation
 
     def __call__(self, images, drawMatches=False):
@@ -31,19 +32,13 @@ class FeatureBasedStitcher(object):
         (left_img, right_img) = images
 
         if self.cached_homo is None:
-            if self.overlap is not None:
-                left_mask = np.zeros(left_img.shape[:2], np.uint8)
-                left_mask[:, left_img.shape[1] - self.overlap:] = 255
-                right_mask = np.zeros(right_img.shape[:2], np.uint8)
-                right_mask[:, :self.overlap] = 255
-            else:
-                left_mask = None
-                right_mask = None
+            left_mask, right_mask = self.calc_feature_masks(left_img.shape[:2], right_img.shape[:2])
             log.info('Start searching for features.')
             (left_kps, left_ds, left_features) = self.get_keypoints_and_descriptors(
                 left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
                 right_img, right_mask, True)
+            helpers.display(right_features)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
             if self.transformation == Transformation.AFFINE:
@@ -68,6 +63,30 @@ class FeatureBasedStitcher(object):
             return (self.cached_homo, result, result_matches)
 
         return self.cached_homo, result
+
+    # def calc_feature_masks(self, left_shape, right_shape):
+    #     if self.overlap is not None:
+    #         left_mask = np.zeros(left_shape, np.uint8)
+    #         left_mask[:, left_shape[1] - self.overlap:] = 255
+    #         right_mask = np.zeros(right_shape, np.uint8)
+    #         right_mask[:, :self.overlap] = 255
+    #     else:
+    #         left_mask = None
+    #         right_mask = None
+    #     return left_mask, right_mask
+
+    def calc_feature_masks(self, left_shape, right_shape):
+        left_mask = np.ones(left_shape, np.uint8)*255
+        right_mask = np.ones(right_shape, np.uint8)*255
+        if self.overlap is not None:
+            left_mask[:, :left_shape[1] - self.overlap] = 0
+            right_mask[:, self.overlap:] = 0
+        if self.border is not None:
+            left_mask[:self.border, :] = 0
+            left_mask[left_shape[0]-self.border:, :] = 0
+            right_mask[:self.border, :] = 0
+            right_mask[right_shape[0] - self.border:, :] = 0
+        return left_mask, right_mask
 
     def get_keypoints_and_descriptors(self, img, mask=None, drawMatches=False):
         # TODO Überprüfen was besser ist als grauers Bild oder ob es egal ist.
@@ -143,20 +162,17 @@ class FeatureBasedStitcher(object):
             return None
         better_matches = helpers.get_mask_matches(good_matches, mask_good)
         left_pts, right_pts, top_matches = helpers.get_top_matches(
-            left_kps, right_kps, better_matches, 3)
-        mask_top = np.ones((3,1))
-        if len(left_pts) >= 1:
+            left_kps, right_kps, better_matches, 1)
+        mask_top = np.ones((1,1))
+        if len(left_pts) == 1:
             log.info('Start finding euclidean transformation matrix.')
-            log.debug('left_pts ={}'.format(left_pts[0][0]))
-            log.debug('right_pts ={}'.format(right_pts))
-            tr_vec = np.subtract(left_pts[1][0], right_pts[1][0])
+            tr_vec = np.subtract(left_pts[0][0], right_pts[0][0])
             log.debug('translation_vector{}'.format(tr_vec))
             euclidean = np.array([
                 [1, 0, tr_vec[0]], #x
                 [0, 1, tr_vec[1]], #y
                 [0, 0, 1]
             ], np.float64)
-            log.debug(type(euclidean[0][0]))
             return (euclidean, mask_top, top_matches)
         return None
 
