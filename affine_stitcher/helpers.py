@@ -60,7 +60,7 @@ def subtract_foreground(cap, display=False):
     while (1):
         ret, frame = cap.read()
 
-        if ret == True:
+        if ret:
             fgmask = fgbg.apply(frame)
             bgimg = fgbg.getBackgroundImage()
 

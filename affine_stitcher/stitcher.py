@@ -32,7 +32,11 @@ class FeatureBasedStitcher(object):
         (left_img, right_img) = images
 
         if self.cached_homo is None:
+
+            # calculates the mask which will mark the feature searching area.
             left_mask, right_mask = self.calc_feature_masks(left_img.shape[:2], right_img.shape[:2])
+
+            # Searching for keypoints and descriptors in the images
             log.info('Start searching for features.')
             (left_kps, left_ds, left_features) = self.get_keypoints_and_descriptors(
                 left_img, left_mask, True)
@@ -41,6 +45,8 @@ class FeatureBasedStitcher(object):
             helpers.display(right_features)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
+
+            # selection of the planar transformation and searching for the right homography
             if self.transformation == Transformation.AFFINE:
                 (homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.PROJECTIVE:
@@ -53,6 +59,7 @@ class FeatureBasedStitcher(object):
             log.info('Transformation matrix found.')
             self.cached_homo = homo
 
+        # Creates Panorama from images
         log.debug('TM =\n{}'.format(self.cached_homo))
         result = self.warp_images(left_img, right_img)
 
@@ -63,17 +70,6 @@ class FeatureBasedStitcher(object):
             return (self.cached_homo, result, result_matches)
 
         return self.cached_homo, result
-
-    # def calc_feature_masks(self, left_shape, right_shape):
-    #     if self.overlap is not None:
-    #         left_mask = np.zeros(left_shape, np.uint8)
-    #         left_mask[:, left_shape[1] - self.overlap:] = 255
-    #         right_mask = np.zeros(right_shape, np.uint8)
-    #         right_mask[:, :self.overlap] = 255
-    #     else:
-    #         left_mask = None
-    #         right_mask = None
-    #     return left_mask, right_mask
 
     def calc_feature_masks(self, left_shape, right_shape):
         left_mask = np.ones(left_shape, np.uint8)*255
