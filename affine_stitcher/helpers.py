@@ -61,6 +61,7 @@ def display(im, title='image', time=0):
     sm = cv2.resize(im, (sw, sh))
     cv2.imshow(title, sm)
     cv2.waitKey(time)
+    cv2.destroyWindow(title)
 
 
 def subtract_foreground(cap, show=False):
