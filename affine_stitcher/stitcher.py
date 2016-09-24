@@ -26,25 +26,25 @@ class FeatureBasedStitcher(object):
         self.overlap = overlap
         self.border = border
         self.transformation = transformation
-        self.cached_left_img = None
+        self.cached_right_img = None
         self.cached_right_img = None
 
     def __call__(self, images, drawMatches=False):
 
         # get the images
-        (left_img, right_img) = images
+        (self.cached_left_img, self.cached_right_img) = images
 
         if self.cached_homo is None:
 
             # calculates the mask which will mark the feature searching area.
-            left_mask, right_mask = self.calc_feature_masks(left_img.shape[:2], right_img.shape[:2])
+            left_mask, right_mask = self.calc_feature_masks(self.cached_left_img.shape[:2], self.cached_right_img.shape[:2])
 
             # Searching for keypoints and descriptors in the images
             log.info('Start searching for features.')
             (left_kps, left_ds, left_features) = self.get_keypoints_and_descriptors(
-                left_img, left_mask, True)
+                self.cached_left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
-                right_img, right_mask, True)
+                self.cached_right_img, right_mask, True)
             # helpers.display(right_features, time=500)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
@@ -65,15 +65,14 @@ class FeatureBasedStitcher(object):
 
         # Creates Panorama from images
         log.debug('TM =\n{}'.format(self.cached_homo))
-        result = self.warp_images(left_img, right_img)
 
         if drawMatches:
             matchesMask = mask_good.ravel().tolist()
             result_matches = cv2.drawMatches(
-                left_img, left_kps, right_img, right_kps, good_matches, matchesMask=None, **draw_params)
-            return self.cached_homo, result, result_matches
+                self.cached_left_img, left_kps, self.cached_right_img, right_kps, good_matches, matchesMask=None, **draw_params)
+            return self.cached_homo, result_matches
 
-        return self.cached_homo, result
+        return self.cached_homo
 
     def calc_feature_masks(self, left_shape, right_shape):
         left_mask = np.ones(left_shape, np.uint8)*255
@@ -189,7 +188,11 @@ class FeatureBasedStitcher(object):
             return translation, mask_top, top_matches
         return None
 
-    def warp_images(self, left_img, right_img):
+    def warp_images(self, left_img = None, right_img = None):
+        if left_img is None:
+            left_img = self.cached_left_img
+        if right_img is None:
+            right_img = self.cached_right_img
         result = cv2.warpPerspective(
             right_img, self.cached_homo,
             (left_img.shape[1] + right_img.shape[1], left_img.shape[0]))
