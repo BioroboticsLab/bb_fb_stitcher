@@ -42,10 +42,10 @@ class FeatureBasedStitcher(object):
                 left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
                 right_img, right_mask, True)
-            helpers.display(right_features)
+            helpers.display(right_features, time=500)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
-
+            assert(len(left_kps)>0 and len(right_kps)>0)
             # selection of the planar transformation and searching for the right homography
             if self.transformation == Transformation.AFFINE:
                 (self.cached_homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
@@ -85,14 +85,15 @@ class FeatureBasedStitcher(object):
 
     def get_keypoints_and_descriptors(self, img, mask=None, drawMatches=False):
         # TODO Überprüfen was besser ist als grauers Bild oder ob es egal ist.
-        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # TODO opencv versions check
 
         surf = cv2.xfeatures2d.SURF_create(hessianThreshold=10, nOctaves=4)
         surf.setUpright(True)
         surf.setExtended(128)
-        kps, ds = surf.detectAndCompute(img_gray, mask)
+
+        kps, ds = surf.detectAndCompute(img, mask)
 
         if drawMatches:
             marked_matches = cv2.drawKeypoints(img, kps, None, (0, 0, 255), 4)
