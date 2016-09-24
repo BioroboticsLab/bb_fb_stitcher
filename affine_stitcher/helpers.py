@@ -1,6 +1,7 @@
 import numpy as np
 from logging import getLogger
 import cv2
+import affine_stitcher.config as config
 
 log = getLogger(__name__)
 
@@ -26,8 +27,22 @@ def get_top_matches(kps1, kps2, matches, num=None):
     return pts1, pts2, top_matches
 
 
-def get_points_n_matches(kps1, kps2, matches, ratio=0.75):
-    good_matches = lowe_ratio_test(matches, ratio)
+# def get_points_n_matches(kps1, kps2, matches, ratio=0.75):
+#     good_matches = lowe_ratio_test(matches, ratio)
+#     pts1, pts2 = get_matching_points(kps1, kps2, good_matches)
+#     return pts1, pts2, good_matches
+
+def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift = config.SHIFT):
+    good_matches = []
+    for m in matches:
+        if len(m) == 2 and m[0].distance < ratio * m[1].distance:
+            m = m[0]
+            dist = abs(np.array(kps1[m.queryIdx].pt)-np.array(kps2[m.trainIdx].pt))
+            log.debug(dist)
+            if dist[1] < max_shift:
+                log.debug(dist[1])
+                good_matches.append(m)
+    # good_matches = lowe_ratio_test(matches, ratio)
     pts1, pts2 = get_matching_points(kps1, kps2, good_matches)
     return pts1, pts2, good_matches
 
@@ -85,3 +100,5 @@ def subtract_foreground(cap, show=False):
             break
 
     return bgimg
+
+
