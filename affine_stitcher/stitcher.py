@@ -12,10 +12,11 @@ draw_params = dict(matchColor=(0, 255, 0),
 log = getLogger(__name__)
 
 class Transformation(Enum):
-    EUCLIDEAN = 0
-    SIMILARITY = 1
-    AFFINE = 2
-    PROJECTIVE = 3
+    TRANSLATION = 0
+    EUCLIDEAN = 1
+    SIMILARITY = 2
+    AFFINE = 3
+    PROJECTIVE = 4
 
 class FeatureBasedStitcher(object):
 
@@ -51,6 +52,8 @@ class FeatureBasedStitcher(object):
                 (self.cached_homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.PROJECTIVE:
                 (self.cached_homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
+            elif self.transformation == Transformation.TRANSLATION:
+                (self.cached_homo, mask_good, good_matches) = self.transform_translation(left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.EUCLIDEAN:
                 (self.cached_homo, mask_good, good_matches) = self.transform_euclidean(left_kps, right_kps, left_ds, right_ds)
             if self.cached_homo is None:
@@ -65,7 +68,7 @@ class FeatureBasedStitcher(object):
         if drawMatches:
             matchesMask = mask_good.ravel().tolist()
             result_matches = cv2.drawMatches(
-                left_img, left_kps, right_img, right_kps, good_matches, matchesMask=matchesMask, **draw_params)
+                left_img, left_kps, right_img, right_kps, good_matches, matchesMask=None, **draw_params)
             return self.cached_homo, result, result_matches
 
         return self.cached_homo, result
@@ -89,7 +92,7 @@ class FeatureBasedStitcher(object):
 
         # TODO opencv versions check
 
-        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=10, nOctaves=4)
+        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=2, nOctaves=4)
         surf.setUpright(True)
         surf.setExtended(128)
 
@@ -153,7 +156,7 @@ class FeatureBasedStitcher(object):
             return affine, mask_top, top_matches
         return None
 
-    def transform_euclidean(self, left_kps, right_kps, left_ds, right_ds):
+    def transform_translation(self, left_kps, right_kps, left_ds, right_ds):
         (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
         if good_matches is None:
             log.warning('No homography matrix for further steps found.')
@@ -163,14 +166,29 @@ class FeatureBasedStitcher(object):
             left_kps, right_kps, better_matches, 1)
         mask_top = np.ones((1,1))
         if len(left_pts) == 1:
-            log.info('Start finding euclidean transformation matrix.')
+            log.info('Start finding translation transformation matrix.')
             tr_vec = np.subtract(left_pts[0][0], right_pts[0][0])
             log.debug('translation_vector{}'.format(tr_vec))
-            euclidean = np.array([
+            translation = np.array([
                 [1, 0, tr_vec[0]], #x
                 [0, 1, tr_vec[1]], #y
                 [0, 0, 1]
             ], np.float64)
+            return translation, mask_top, top_matches
+        return None
+
+    def transform_euclidean(self, left_kps, right_kps, left_ds, right_ds):
+        (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
+        if good_matches is None:
+            log.warning('No homography matrix for further steps found.')
+            return None
+        better_matches = helpers.get_mask_matches(good_matches, mask_good)
+        left_pts, right_pts, top_matches = helpers.get_top_matches(
+            left_kps, right_kps, better_matches, 2)
+        mask_top = np.ones((2,1))
+        if len(left_pts) == 2:
+            log.info('Start finding euclidean transformation matrix.')
+            euclidean = helpers.bla(left_pts[0][0], right_pts[0][0], left_pts[1][0], right_pts[1][0])
             return euclidean, mask_top, top_matches
         return None
 
