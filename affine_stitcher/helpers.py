@@ -125,7 +125,7 @@ def cart_2_pol(pt):
     return rho, phi
 
 
-def bla(center_l, center_r, pt_l, pt_r):
+def get_euclid_transform_mat(center_l, center_r, pt_l, pt_r):
 
     # get the translation vector
     tr_vec = np.subtract(center_l, center_r)
@@ -141,12 +141,12 @@ def bla(center_l, center_r, pt_l, pt_r):
     rot_angle = trans_pt_r[1] - pt_l[1]
 
     # -rot_angle opencv measures angle counter clockwise
-    roation_mat = np.vstack([cv2.getRotationMatrix2D((0,0), -rot_angle, 1.0),
+    rotation_mat = np.vstack([cv2.getRotationMatrix2D((0,0), -rot_angle, 1.0),
                              [0, 0, 1]])
 
 
 
-    log.debug('Euclidean rotation matrix = \n{}'.format(roation_mat))
+    log.debug('Euclidean rotation matrix = \n{}'.format(rotation_mat))
 
     translation = np.array([
         [1, 0, tr_vec[0]],  # x
@@ -154,9 +154,9 @@ def bla(center_l, center_r, pt_l, pt_r):
         [0, 0, 1]
     ], np.float64)
 
-    euclidean = roation_mat.dot(translation)
+    euclidean = rotation_mat.dot(translation)
 
-    log.debug('Euclidean Transormation =\n{}'.format(euclidean))
+    log.debug('Euclidean Transformation =\n{}'.format(euclidean))
 
     return euclidean
 

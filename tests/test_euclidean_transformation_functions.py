@@ -9,7 +9,7 @@ ptr_center = np.array([1,1])
 ptl_rot = np.array([6,2])
 ptr_rot = np.array([2,2])
 
-print(helpers.bla(ptl_center, ptr_center, ptl_rot, ptr_rot))
+print(helpers.get_euclid_transform_mat(ptl_center, ptr_center, ptl_rot, ptr_rot))
 
 # print(helpers.angle_between(np.array([1,1]), np.array([0,1])))
 

@@ -1,7 +1,7 @@
-"""Specific parameters for the Beebsbook Project.
+"""Specific parameters for the Beesbook Project.
 
 These are the camera parameter for the
-# PointGrey Flea3 Camera with the objectiv RICOH FL-CC1214A-2M
+# PointGrey Flea3 Camera with the objective RICOH FL-CC1214A-2M
 # distance 30cm
 """
 import numpy as np

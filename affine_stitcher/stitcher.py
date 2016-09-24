@@ -26,6 +26,8 @@ class FeatureBasedStitcher(object):
         self.overlap = overlap
         self.border = border
         self.transformation = transformation
+        self.cached_left_img = None
+        self.cached_right_img = None
 
     def __call__(self, images, drawMatches=False):
 
@@ -43,19 +45,19 @@ class FeatureBasedStitcher(object):
                 left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
                 right_img, right_mask, True)
-            helpers.display(right_features, time=500)
+            # helpers.display(right_features, time=500)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
             assert(len(left_kps)>0 and len(right_kps)>0)
             # selection of the planar transformation and searching for the right homography
-            if self.transformation == Transformation.AFFINE:
-                (self.cached_homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
-            elif self.transformation == Transformation.PROJECTIVE:
+            if self.transformation == Transformation.PROJECTIVE:
                 (self.cached_homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
-            elif self.transformation == Transformation.TRANSLATION:
-                (self.cached_homo, mask_good, good_matches) = self.transform_translation(left_kps, right_kps, left_ds, right_ds)
+            elif self.transformation == Transformation.AFFINE:
+                (self.cached_homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.EUCLIDEAN:
                 (self.cached_homo, mask_good, good_matches) = self.transform_euclidean(left_kps, right_kps, left_ds, right_ds)
+            elif self.transformation == Transformation.TRANSLATION:
+                (self.cached_homo, mask_good, good_matches) = self.transform_translation(left_kps, right_kps, left_ds, right_ds)
             if self.cached_homo is None:
                 log.warning('No Transformation matrix found.')
                 return None
@@ -86,8 +88,8 @@ class FeatureBasedStitcher(object):
             right_mask[right_shape[0] - self.border:, :] = 0
         return left_mask, right_mask
 
-    def get_keypoints_and_descriptors(self, img, mask=None, drawMatches=False):
-        # TODO Überprüfen was besser ist als grauers Bild oder ob es egal ist.
+    @staticmethod
+    def get_keypoints_and_descriptors(img, mask=None, drawMatches=False):
         # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # TODO opencv versions check
@@ -120,6 +122,82 @@ class FeatureBasedStitcher(object):
             return homo, mask_good, good_matches
         return None
 
+    def transform_affine(self, left_kps, right_kps, left_ds, right_ds):
+        (homo, mask_good,
+         good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
+                                                                   right_kps,
+                                                                   left_ds,
+                                                                   right_ds)
+        if good_matches is None:
+            log.warning('No homography matrix for further steps found.')
+            return None
+        better_matches = helpers.get_mask_matches(good_matches, mask_good)
+        left_pts, right_pts, top_matches = helpers.get_top_matches(
+            left_kps, right_kps, better_matches, 3)
+        mask_top = np.ones((3, 1))
+        if len(left_pts) > 2:
+            log.info('Start finding affine transformation matrix.')
+            affine = cv2.getAffineTransform(left_pts, right_pts)
+            affine = cv2.invertAffineTransform(affine)
+            affine = np.vstack([affine, [0, 0, 1]])
+            return affine, mask_top, top_matches
+        return None
+
+    @staticmethod
+    def transform_euclidean(left_kps, right_kps, left_ds, right_ds):
+        (homo, mask_good,
+         good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
+                                                                   right_kps,
+                                                                   left_ds,
+                                                                   right_ds)
+        if good_matches is None:
+            log.warning('No homography matrix for further steps found.')
+            return None
+        better_matches = helpers.get_mask_matches(good_matches, mask_good)
+        left_pts, right_pts, top_matches = helpers.get_top_matches(
+            left_kps, right_kps, better_matches, 2)
+        mask_top = np.ones((2, 1))
+        if len(left_pts) == 2:
+            log.info('Start finding euclidean transformation matrix.')
+            euclidean = helpers.get_euclid_transform_mat(left_pts[0][0], right_pts[0][0],
+                                                         left_pts[1][0], right_pts[1][0])
+            return euclidean, mask_top, top_matches
+        return None
+
+    def transform_translation(self, left_kps, right_kps, left_ds, right_ds):
+        (homo, mask_good,
+         good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
+                                                                   right_kps,
+                                                                   left_ds,
+                                                                   right_ds)
+        if good_matches is None:
+            log.warning('No homography matrix for further steps found.')
+            return None
+        better_matches = helpers.get_mask_matches(good_matches, mask_good)
+        left_pts, right_pts, top_matches = helpers.get_top_matches(
+            left_kps, right_kps, better_matches, 1)
+        mask_top = np.ones((1, 1))
+        if len(left_pts) == 1:
+            log.info('Start finding translation transformation matrix.')
+            tr_vec = np.subtract(left_pts[0][0], right_pts[0][0])
+            log.debug('translation_vector{}'.format(tr_vec))
+            translation = np.array([
+                [1, 0, tr_vec[0]],  # x
+                [0, 1, tr_vec[1]],  # y
+                [0, 0, 1]
+            ], np.float64)
+            return translation, mask_top, top_matches
+        return None
+
+    def warp_images(self, left_img, right_img):
+        result = cv2.warpPerspective(
+            right_img, self.cached_homo,
+            (left_img.shape[1] + right_img.shape[1], left_img.shape[0]))
+        result[0:left_img.shape[0], 0:left_img.shape[1]] = left_img
+        return result
+
+
+    # deprecated
     @staticmethod
     def get_best_3_matches(left_kps, right_kps, left_ds, right_ds):
         bf = cv2.BFMatcher()
@@ -138,63 +216,5 @@ class FeatureBasedStitcher(object):
             return affine, mask_better, better_matches
         return None
 
-    def transform_affine(self, left_kps, right_kps, left_ds, right_ds):
-        (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
-        if good_matches is None:
-            log.warning('No homography matrix for further steps found.')
-            return None
-        better_matches = helpers.get_mask_matches(good_matches, mask_good)
-        left_pts, right_pts, top_matches = helpers.get_top_matches(
-            left_kps, right_kps, better_matches, 3)
-        mask_top = np.ones((3, 1))
-        if len(left_pts) > 2:
-            log.info('Start finding affine transformation matrix.')
-            # TODO affine andere bezeichnung ändern überschneidet sich mit Bool affine
-            affine = cv2.getAffineTransform(left_pts, right_pts)
-            affine = cv2.invertAffineTransform(affine)
-            affine = np.vstack([affine, [0, 0, 1]])
-            return affine, mask_top, top_matches
-        return None
 
-    def transform_translation(self, left_kps, right_kps, left_ds, right_ds):
-        (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
-        if good_matches is None:
-            log.warning('No homography matrix for further steps found.')
-            return None
-        better_matches = helpers.get_mask_matches(good_matches, mask_good)
-        left_pts, right_pts, top_matches = helpers.get_top_matches(
-            left_kps, right_kps, better_matches, 1)
-        mask_top = np.ones((1,1))
-        if len(left_pts) == 1:
-            log.info('Start finding translation transformation matrix.')
-            tr_vec = np.subtract(left_pts[0][0], right_pts[0][0])
-            log.debug('translation_vector{}'.format(tr_vec))
-            translation = np.array([
-                [1, 0, tr_vec[0]], #x
-                [0, 1, tr_vec[1]], #y
-                [0, 0, 1]
-            ], np.float64)
-            return translation, mask_top, top_matches
-        return None
-
-    def transform_euclidean(self, left_kps, right_kps, left_ds, right_ds):
-        (homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
-        if good_matches is None:
-            log.warning('No homography matrix for further steps found.')
-            return None
-        better_matches = helpers.get_mask_matches(good_matches, mask_good)
-        left_pts, right_pts, top_matches = helpers.get_top_matches(
-            left_kps, right_kps, better_matches, 2)
-        mask_top = np.ones((2,1))
-        if len(left_pts) == 2:
-            log.info('Start finding euclidean transformation matrix.')
-            euclidean = helpers.bla(left_pts[0][0], right_pts[0][0], left_pts[1][0], right_pts[1][0])
-            return euclidean, mask_top, top_matches
-        return None
-
-    def warp_images(self, left_img, right_img):
-        result = cv2.warpPerspective(
-            right_img, self.cached_homo, (left_img.shape[1] + right_img.shape[1], left_img.shape[0]))
-        result[0:left_img.shape[0], 0:left_img.shape[1]] = left_img
-        return result
 
