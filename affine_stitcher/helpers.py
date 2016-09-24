@@ -39,9 +39,7 @@ def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift = config.SHIFT)
         if len(m) == 2 and m[0].distance < ratio * m[1].distance:
             m = m[0]
             dist = abs(np.array(kps1[m.queryIdx].pt)-np.array(kps2[m.trainIdx].pt))
-            log.debug(dist)
             if dist[1] < max_shift:
-                log.debug(dist[1])
                 good_matches.append(m)
     # good_matches = lowe_ratio_test(matches, ratio)
     pts1, pts2 = get_matching_points(kps1, kps2, good_matches)
@@ -142,7 +140,8 @@ def bla(center_l, center_r, pt_l, pt_r):
     # get the rotation angle of right point to be in one line with pt_l
     rot_angle = trans_pt_r[1] - pt_l[1]
 
-    roation_mat = np.vstack([cv2.getRotationMatrix2D((0,0), rot_angle, 1.0),
+    # -rot_angle opencv measures angle counter clockwise
+    roation_mat = np.vstack([cv2.getRotationMatrix2D((0,0), -rot_angle, 1.0),
                              [0, 0, 1]])
 
 
