@@ -10,7 +10,8 @@ setup(
     long_description='',
     entry_points={
         'console_scripts': [
-            'bb_fg_subtract = affine_stitcher.scripts.bb_fg_subtract:main'
+            'bb_fg_subtract = affine_stitcher.scripts.bb_fg_subtract:main',
+            'bb_fb_stitcher = affine_stitcher.scripts.bb_fb_stitcher:main'
         ]
     },
     url='https://github.com/gitmirgut/bb_affine_stitcher',
