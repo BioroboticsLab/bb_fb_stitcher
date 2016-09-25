@@ -81,23 +81,26 @@ def display(im, title='image', time=0):
 def subtract_foreground(cap, show=False):
     fgbg = cv2.createBackgroundSubtractorMOG2()
     bgimg = None
-    while 1:
-        ret, frame = cap.read()
+    try:
 
-        if ret:
-            fgbg.apply(frame)
-            bgimg = fgbg.getBackgroundImage()
+        while 1:
+            ret, frame = cap.read()
 
-            if show:
-                cv2.namedWindow('img', cv2.WINDOW_NORMAL)
-                cv2.resizeWindow('img', 800, 600)
-                cv2.imshow('img', bgimg)
-                k = cv2.waitKey(1) & 0xff
-                if k == 27:
-                    break
-        else:
-            break
+            if ret:
+                fgbg.apply(frame)
+                bgimg = fgbg.getBackgroundImage()
 
+                if show:
+                    cv2.namedWindow('img', cv2.WINDOW_NORMAL)
+                    cv2.resizeWindow('img', 800, 600)
+                    cv2.imshow('img', bgimg)
+                    k = cv2.waitKey(1) & 0xff
+                    if k == 27:
+                        break
+            else:
+                break
+    except KeyboardInterrupt:
+        pass
     return bgimg
 
 
