@@ -121,7 +121,8 @@ class FeatureBasedStitcher(object):
             return homo, mask_good, good_matches
         return None
 
-    def transform_affine(self, left_kps, right_kps, left_ds, right_ds):
+    @staticmethod
+    def transform_affine(left_kps, right_kps, left_ds, right_ds):
         (homo, mask_good,
          good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
                                                                    right_kps,
@@ -163,7 +164,8 @@ class FeatureBasedStitcher(object):
             return euclidean, mask_top, top_matches
         return None
 
-    def transform_translation(self, left_kps, right_kps, left_ds, right_ds):
+    @staticmethod
+    def transform_translation(left_kps, right_kps, left_ds, right_ds):
         (homo, mask_good,
          good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
                                                                    right_kps,
@@ -218,6 +220,5 @@ class FeatureBasedStitcher(object):
             mask_better = np.ones((3, 1))
             return affine, mask_better, better_matches
         return None
-
 
 
