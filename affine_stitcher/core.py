@@ -11,14 +11,18 @@ log = getLogger(__name__)
 
 class BB_FeatureBasedStitcher(object):
 
-    def __init__(self):
-        self.img_l_size = None
-        self.img_r_size = None
+    def __init__(self, transform=Transformation.AFFINE):
         self.whole_transform_left = None
         self.whole_transform_right = None
         self.pano_size = None
+
+        self.img_l_size = None
+        self.img_r_size = None
+
         self.cached_img_l = None
         self.cached_img_r = None
+
+        self.transform = transform
 
     def __call__(self, images, pano=False):
         (self.cached_img_l, self.cached_img_r) = images
@@ -31,7 +35,7 @@ class BB_FeatureBasedStitcher(object):
         img_l_ro, img_l_ro_mat = ro.rotate_image(self.cached_img_l, 90, True)
         img_r_ro, img_r_ro_mat = ro.rotate_image(self.cached_img_r, -90, True)
 
-        st =  stitch.FeatureBasedStitcher(overlap=400, border=500, transformation=Transformation.AFFINE)
+        st =  stitch.FeatureBasedStitcher(overlap=400, border=500, transformation=self.transform)
         homo = st((img_l_ro, img_r_ro))
 
         self.whole_transform_left = img_l_ro_mat
