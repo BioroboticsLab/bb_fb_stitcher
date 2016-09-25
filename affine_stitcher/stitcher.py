@@ -58,6 +58,8 @@ class FeatureBasedStitcher(object):
                 (self.cached_homo, mask_good, good_matches) = self.transform_euclidean(left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.TRANSLATION:
                 (self.cached_homo, mask_good, good_matches) = self.transform_translation(left_kps, right_kps, left_ds, right_ds)
+            else:
+                print('Not implemented yet.')
             if self.cached_homo is None:
                 log.warning('No Transformation matrix found.')
                 return None
