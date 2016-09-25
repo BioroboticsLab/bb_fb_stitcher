@@ -19,7 +19,7 @@ class Rotator(object):
     def __get_affine_mat(self, shape, angle):
         self.angle = angle
         self.shape = shape
-        log.info('Start searching rotation_mat.')
+        log.info('Start searching rotation_mat for angle {} and shape {}'.format(angle, shape))
         # Get img size
         size = (shape[1], shape[0])
         center = tuple(np.array(size) / 2.0)
