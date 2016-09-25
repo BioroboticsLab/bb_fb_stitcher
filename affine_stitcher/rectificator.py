@@ -4,6 +4,7 @@ from logging import getLogger
 
 log = getLogger(__name__)
 
+
 class Rectificator(object):
     def __init__(self, intrinsic_mat=config.INTR_M, distortion_coeff=config.DIST_C):
         self.intr_m = intrinsic_mat
