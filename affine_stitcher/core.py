@@ -22,6 +22,8 @@ class BB_FeatureBasedStitcher(object):
 
     def __call__(self, images, pano=False):
         (self.cached_img_l, self.cached_img_r) = images
+        self.img_l_size = tuple([self.cached_img_l.shape[1],self.cached_img_l.shape[0]])
+        self.img_r_size = tuple([self.cached_img_r.shape[1],self.cached_img_r.shape[0]])
 
         re = rect.Rectificator()
         self.cached_img_l, self.cached_img_r = re.rectify_images(self.cached_img_l, self.cached_img_r)
@@ -68,9 +70,10 @@ class BB_FeatureBasedStitcher(object):
 
     @staticmethod
     def map_coordinates(points, homography, org_size_img):
+        log.info('Start mapping {} points.'.format(len(points)))
         re = rect.Rectificator()
         points_rect = re.rectify_points(points, org_size_img)
-        return cv2.transform(points_rect, homography)
+        return cv2.perspectiveTransform(points_rect, homography)
 
     def map_left_coordinates(self, points):
         return self.map_coordinates(points, self.whole_transform_left, self.img_l_size)
@@ -90,9 +93,9 @@ class BB_FeatureBasedStitcher(object):
 
     def load_data(self, path):
         with np.load(path) as data:
-            self.img_l_size = data['img_l_size']
-            self.img_r_size = data['img_r_size']
+            self.img_l_size = tuple(data['img_l_size']) # savez doen't save the tuple info
+            self.img_r_size = tuple(data['img_r_size'])
             self.whole_transform_left = data['whole_transform_left']
             self.whole_transform_right = data['whole_transform_right']
-            self.pano_size = data['pano_size']
+            self.pano_size = tuple(data['pano_size'])
         log.info('Stitcher arguments loaded from {}'.format(path))
