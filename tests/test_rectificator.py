@@ -34,8 +34,10 @@ imgl, imgr = rect.rectify_images(img_l_m, img_r_m)
 helpers.display(imgl)
 helpers.display(imgr)
 
-pts_left_rect = rect.rectify_points(pts_left_org, img_l.shape[:2])
-pts_right_rect = rect.rectify_points(pts_right_org, img_r.shape[:2])
+size_left = (img_l.shape[1],img_l.shape[0])
+size_right = (img_r.shape[1], img_r.shape[0])
+pts_left_rect = rect.rectify_points(pts_left_org, size_left)
+pts_right_rect = rect.rectify_points(pts_right_org, size_right)
 
 img_l_m = draw_makers(imgl, pts_left_rect, (0, 0, 255))
 img_r_m = draw_makers(imgr, pts_right_rect, (0, 0, 255))
