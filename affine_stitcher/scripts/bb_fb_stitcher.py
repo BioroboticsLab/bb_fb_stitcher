@@ -11,6 +11,7 @@ def process_images(args):
     img_r =cv2.imread(args.right,-1)
     bb_stitcher_fb = core.BB_FeatureBasedStitcher(Transformation(args.transform))
     __, __, __, result = bb_stitcher_fb((img_l, img_r), True)
+    result = bb_stitcher_fb.overlay_images()
     cv2.imwrite(args.pano, result)
     pass
 

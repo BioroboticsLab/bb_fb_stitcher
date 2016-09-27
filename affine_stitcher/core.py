@@ -30,10 +30,10 @@ class BB_FeatureBasedStitcher(object):
         self.img_r_size = tuple([self.cached_img_r.shape[1],self.cached_img_r.shape[0]])
 
         re = rect.Rectificator()
-        self.cached_img_l, self.cached_img_r = re.rectify_images(self.cached_img_l, self.cached_img_r)
+        img_l, img_r = re.rectify_images(self.cached_img_l, self.cached_img_r)
         ro = rot.Rotator()
-        img_l_ro, img_l_ro_mat = ro.rotate_image(self.cached_img_l, 90, True)
-        img_r_ro, img_r_ro_mat = ro.rotate_image(self.cached_img_r, -90, True)
+        img_l_ro, img_l_ro_mat = ro.rotate_image(img_l, 90, True)
+        img_r_ro, img_r_ro_mat = ro.rotate_image(img_r, -90, True)
 
         st =  stitch.FeatureBasedStitcher(overlap=400, border=500, transformation=self.transform)
         homo = st((img_l_ro, img_r_ro))
@@ -41,7 +41,7 @@ class BB_FeatureBasedStitcher(object):
         self.whole_transform_left = img_l_ro_mat
         self.whole_transform_right = homo.dot(img_r_ro_mat)
 
-        trans_m , self.pano_size = helpers.get_translation(self.cached_img_l.shape[:2], self.cached_img_r.shape[:2], self.whole_transform_left, self.whole_transform_right)
+        trans_m , self.pano_size = helpers.get_translation(img_l.shape[:2], img_r.shape[:2], self.whole_transform_left, self.whole_transform_right)
         log.debug('new_size =\n{}'.format(self.pano_size))
 
         self.whole_transform_left = trans_m.dot(self.whole_transform_left)
@@ -55,6 +55,7 @@ class BB_FeatureBasedStitcher(object):
 
     @staticmethod
     def transform_image(img, homography, pano_size):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
         re = rect.Rectificator()
         img_rect = re.rectify_images(img)
         trans_img = cv2.warpPerspective(img_rect, homography, pano_size)
@@ -76,8 +77,6 @@ class BB_FeatureBasedStitcher(object):
         if img_l is None or img_r is None:
             img_l = self.cached_img_l
             img_r = self.cached_img_r
-        img_l = cv2.cvtColor(img_l, cv2.COLOR_BGR2BGRA)
-        img_r = cv2.cvtColor(img_r, cv2.COLOR_BGR2BGRA)
         trans_img_l = self.transform_left_image(img_l)
         trans_img_r = self.transform_right_image(img_r)
         return helpers.overlay_images(trans_img_l, trans_img_r)
