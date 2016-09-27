@@ -10,9 +10,13 @@ def process_images(args):
     img_l =cv2.imread(args.left,-1)
     img_r =cv2.imread(args.right,-1)
     bb_stitcher_fb = core.BB_FeatureBasedStitcher(Transformation(args.transform))
-    __, __, __, result = bb_stitcher_fb((img_l, img_r), True)
-    result = bb_stitcher_fb.overlay_images()
-    cv2.imwrite(args.pano, result)
+    bb_stitcher_fb((img_l, img_r))
+    bb_stitcher_fb.save_data(args.data)
+    print(args.pano)
+    if args.pano is not None:
+        result = bb_stitcher_fb.overlay_images()
+        cv2.imwrite(args.pano[0], result)
+    print(args.pano)
     pass
 
 
@@ -24,13 +28,14 @@ def main():
     )
     parser.add_argument('left', help='Path of the left image.', type=str)
     parser.add_argument('right', help='Path of the left image.', type=str)
-    parser.add_argument('pano', help='Output path of the panorama.', type=str)
+    parser.add_argument('data', help='Output path of the stitching data.', type=str)
     parser.add_argument('transform', help='Type of Transfromation: \n'
                                           '0 - Translation\n'
                                           '1 - EUCLIDEAN\n'
                                           '(2 - SIMILARITY)\n'
                                           '3 - AFFINE\n'
                                           '4 - PROJECTIVE', type=int, choices=[0,1,3,4])
+    parser.add_argument('--pano', '-p', nargs=1, help='path of the result image')
 
     args = parser.parse_args()
     process_images(args)
