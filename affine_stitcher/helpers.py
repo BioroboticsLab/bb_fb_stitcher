@@ -27,12 +27,6 @@ def get_top_matches(kps1, kps2, matches, num=None):
     pts1, pts2 = get_matching_points(kps1, kps2, top_matches)
     return pts1, pts2, top_matches
 
-
-# def get_points_n_matches(kps1, kps2, matches, ratio=0.75):
-#     good_matches = lowe_ratio_test(matches, ratio)
-#     pts1, pts2 = get_matching_points(kps1, kps2, good_matches)
-#     return pts1, pts2, good_matches
-
 def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift = config.SHIFT):
     good_matches = []
     for m in matches:
@@ -187,4 +181,10 @@ def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
 
     return trans_m, total_size
 
-
+def overlay_images(foreground_image, background_image):
+    result = np.copy(foreground_image)
+    for r, row in enumerate(result):
+        for c, cell in enumerate(row):
+            if cell[3] == 0:
+                result[r][c] = background_image[r][c]
+    return result

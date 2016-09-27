@@ -72,6 +72,16 @@ class BB_FeatureBasedStitcher(object):
         trans_img = BB_FeatureBasedStitcher.transform_image(img, self.whole_transform_right, self.pano_size)
         return trans_img
 
+    def overlay_images(self, img_l = None, img_r = None):
+        if img_l is None or img_r is None:
+            img_l = self.cached_img_l
+            img_r = self.cached_img_r
+        img_l = cv2.cvtColor(img_l, cv2.COLOR_BGR2BGRA)
+        img_r = cv2.cvtColor(img_r, cv2.COLOR_BGR2BGRA)
+        trans_img_l = self.transform_left_image(img_l)
+        trans_img_r = self.transform_right_image(img_r)
+        return helpers.overlay_images(trans_img_l, trans_img_r)
+
     @staticmethod
     def map_coordinates(points, homography, org_size_img):
         log.info('Start mapping {} points.'.format(len(points)))
