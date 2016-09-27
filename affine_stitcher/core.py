@@ -24,7 +24,7 @@ class BB_FeatureBasedStitcher(object):
 
         self.transform = transform
 
-    def __call__(self, images, pano=False):
+    def __call__(self, images, angles = (90,-90)):
         (self.cached_img_l, self.cached_img_r) = images
         self.img_l_size = tuple([self.cached_img_l.shape[1],self.cached_img_l.shape[0]])
         self.img_r_size = tuple([self.cached_img_r.shape[1],self.cached_img_r.shape[0]])
@@ -32,8 +32,8 @@ class BB_FeatureBasedStitcher(object):
         re = rect.Rectificator()
         img_l, img_r = re.rectify_images(self.cached_img_l, self.cached_img_r)
         ro = rot.Rotator()
-        img_l_ro, img_l_ro_mat = ro.rotate_image(img_l, 90, True)
-        img_r_ro, img_r_ro_mat = ro.rotate_image(img_r, -90, True)
+        img_l_ro, img_l_ro_mat = ro.rotate_image(img_l, angles[0], True)
+        img_r_ro, img_r_ro_mat = ro.rotate_image(img_r, angles[1], True)
 
         st =  stitch.FeatureBasedStitcher(overlap=400, border=500, transformation=self.transform)
         homo = st((img_l_ro, img_r_ro))
@@ -46,10 +46,6 @@ class BB_FeatureBasedStitcher(object):
 
         self.whole_transform_left = trans_m.dot(self.whole_transform_left)
         self.whole_transform_right = trans_m.dot(self.whole_transform_right)
-
-        if pano:
-            pano_img = st.warp_images()
-            return self.whole_transform_left, self.whole_transform_right, self.pano_size, pano_img
 
         return self.img_l_size, self.img_l_size, self.whole_transform_left, self.whole_transform_right, self.pano_size
 
