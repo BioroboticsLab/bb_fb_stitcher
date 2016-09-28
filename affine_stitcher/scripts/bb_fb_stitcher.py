@@ -1,8 +1,6 @@
-import affine_stitcher.helpers as helpers
 import affine_stitcher.core as core
 from affine_stitcher.stitcher import Transformation
 import argparse
-import os
 import cv2
 from argparse import RawTextHelpFormatter
 

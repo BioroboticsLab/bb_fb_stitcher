@@ -75,7 +75,32 @@ class BB_FeatureBasedStitcher(object):
             img_r = self.cached_img_r
         trans_img_l = self.transform_left_image(img_l)
         trans_img_r = self.transform_right_image(img_r)
-        return helpers.overlay_images(trans_img_l, trans_img_r)
+        return BB_FeatureBasedStitcher.blend_transparent(trans_img_l, trans_img_r)
+
+    def blend_transparent(fg_img = None, bg_img = None, blur = True):
+        # Split out the transparency mask from the colour info
+        overlay_img = fg_img[:, :, :3] # Grab the BRG planes
+        overlay_mask = fg_img[:, :, 3:]  # And the alpha plane
+
+        if blur:
+            # Let's shrink and blur it a little to make the transitions smoother...
+            overlay_mask = cv2.erode(overlay_mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (20, 20)))
+            overlay_mask = cv2.blur(overlay_mask, (20, 20))
+
+        # Again calculate the inverse mask
+        background_mask = 255 - overlay_mask
+
+        # Turn the masks into three channel, so we can use them as weights
+        overlay_mask = cv2.cvtColor(overlay_mask, cv2.COLOR_GRAY2BGR)
+        background_mask = cv2.cvtColor(background_mask, cv2.COLOR_GRAY2BGR)
+
+        # Create a masked out background image, and masked out overlay
+        # We convert the images to floating point in range 0.0 - 1.0
+        bg_part = (bg_img[:, :, :3]* (1 / 255.0)) * (background_mask * (1 / 255.0))
+        overlay_part = (overlay_img * (1 / 255.0)) * (overlay_mask * (1 / 255.0))
+
+        # And finally just add them together, and rescale it back to an 8bit integer image
+        return np.uint8(cv2.addWeighted(bg_part, 255.0, overlay_part, 255.0, 0.0))
 
     @staticmethod
     def map_coordinates(points, homography, org_size_img):
