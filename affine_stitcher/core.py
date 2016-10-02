@@ -10,6 +10,7 @@ import numpy as np
 log = getLogger(__name__)
 
 class BB_FeatureBasedStitcher(object):
+    """Stitching the images of the BeesBook Project."""
 
     def __init__(self, transform=Transformation.AFFINE):
         self.whole_transform_left = None
