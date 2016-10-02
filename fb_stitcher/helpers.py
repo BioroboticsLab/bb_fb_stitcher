@@ -27,7 +27,7 @@ def get_top_matches(kps1, kps2, matches, num=None):
     pts1, pts2 = get_matching_points(kps1, kps2, top_matches)
     return pts1, pts2, top_matches
 
-def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift = config.SHIFT):
+def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift=config.SHIFT):
     good_matches = []
     for m in matches:
         if len(m) == 2 and m[0].distance < ratio * m[1].distance:

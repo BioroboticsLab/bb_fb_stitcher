@@ -1,18 +1,21 @@
-from logging import getLogger
+"""Main Class of the feature based stitcher for the Beesbook Project."""
+import cv2
+import fb_stitcher.helpers as helpers
 import fb_stitcher.rectificator as rect
 import fb_stitcher.rotator as rot
 import fb_stitcher.stitcher as stitch
 from fb_stitcher.stitcher import Transformation
-import fb_stitcher.helpers as helpers
-import cv2
+from logging import getLogger
 import numpy as np
 
 log = getLogger(__name__)
+
 
 class BB_FeatureBasedStitcher(object):
     """Stitching the images of the BeesBook Project."""
 
     def __init__(self, transform=Transformation.AFFINE):
+        """Initialize feature based Stitcher."""
         self.whole_transform_left = None
         self.whole_transform_right = None
         self.pano_size = None
@@ -25,10 +28,11 @@ class BB_FeatureBasedStitcher(object):
 
         self.transform = transform
 
-    def __call__(self, images, angles = (90,-90)):
+    def __call__(self, images, angles=(90, -90)):
+        """Calculate Stitching data for further stitching."""
         (self.cached_img_l, self.cached_img_r) = images
-        self.img_l_size = tuple([self.cached_img_l.shape[1],self.cached_img_l.shape[0]])
-        self.img_r_size = tuple([self.cached_img_r.shape[1],self.cached_img_r.shape[0]])
+        self.img_l_size = tuple([self.cached_img_l.shape[1], self.cached_img_l.shape[0]])
+        self.img_r_size = tuple([self.cached_img_r.shape[1], self.cached_img_r.shape[0]])
 
         re = rect.Rectificator()
         img_l, img_r = re.rectify_images(self.cached_img_l, self.cached_img_r)
