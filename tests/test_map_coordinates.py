@@ -1,5 +1,5 @@
 import logging.config
-import affine_stitcher.core as core
+import fb_stitcher.core as core
 import cv2
 import numpy as np
 

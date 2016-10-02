@@ -1,6 +1,6 @@
 import argparse
 import cv2
-import affine_stitcher.core as core
+import fb_stitcher.core as core
 
 
 def process_videos(args):

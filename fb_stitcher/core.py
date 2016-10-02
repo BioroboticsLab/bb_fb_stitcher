@@ -1,9 +1,9 @@
 from logging import getLogger
-import affine_stitcher.rectificator as rect
-import affine_stitcher.rotator as rot
-import affine_stitcher.stitcher as stitch
-from affine_stitcher.stitcher import Transformation
-import affine_stitcher.helpers as helpers
+import fb_stitcher.rectificator as rect
+import fb_stitcher.rotator as rot
+import fb_stitcher.stitcher as stitch
+from fb_stitcher.stitcher import Transformation
+import fb_stitcher.helpers as helpers
 import cv2
 import numpy as np
 

@@ -1,4 +1,4 @@
-import affine_stitcher.config as config
+import fb_stitcher.config as config
 import cv2
 from logging import getLogger
 

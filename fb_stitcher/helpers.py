@@ -1,7 +1,7 @@
 import numpy as np
 from logging import getLogger
 import cv2
-import affine_stitcher.config as config
+import fb_stitcher.config as config
 import math
 
 log = getLogger(__name__)

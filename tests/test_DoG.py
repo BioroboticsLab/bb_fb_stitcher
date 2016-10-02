@@ -1,5 +1,5 @@
 import cv2
-import affine_stitcher.helpers as helpers
+import fb_stitcher.helpers as helpers
 from skimage.feature import blob_dog
 from skimage.filters import roberts, sobel, scharr, prewitt
 from skimage import exposure

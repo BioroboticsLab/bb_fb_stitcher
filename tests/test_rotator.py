@@ -1,7 +1,7 @@
-import affine_stitcher.rotator as rotator
+import fb_stitcher.rotator as rotator
 import logging.config
 import cv2
-import affine_stitcher.helpers as helpers
+import fb_stitcher.helpers as helpers
 import numpy as np
 logging.config.fileConfig('logging_config.ini')
 img = cv2.imread('data/rotator/Input/Cam_0_20161507130847_631282517.jpg')

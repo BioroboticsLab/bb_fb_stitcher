@@ -1,5 +1,5 @@
-import affine_stitcher.core as core
-from affine_stitcher.stitcher import Transformation
+import fb_stitcher.core as core
+from fb_stitcher.stitcher import Transformation
 import argparse
 import cv2
 from argparse import RawTextHelpFormatter

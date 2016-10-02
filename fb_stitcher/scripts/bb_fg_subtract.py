@@ -1,4 +1,4 @@
-import affine_stitcher.helpers as helpers
+import fb_stitcher.helpers as helpers
 import argparse
 import os
 import cv2

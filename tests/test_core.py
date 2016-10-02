@@ -1,8 +1,8 @@
 import logging.config
-import affine_stitcher.core as core
+import fb_stitcher.core as core
 import cv2
-import affine_stitcher.helpers as helpers
-from affine_stitcher.stitcher import Transformation
+import fb_stitcher.helpers as helpers
+from fb_stitcher.stitcher import Transformation
 
 logging.config.fileConfig('logging_config.ini')
 

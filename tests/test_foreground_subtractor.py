@@ -1,4 +1,4 @@
-import affine_stitcher.helpers as helpers
+import fb_stitcher.helpers as helpers
 from os.path import basename
 import cv2
 import os

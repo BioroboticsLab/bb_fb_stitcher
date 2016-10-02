@@ -1,9 +1,9 @@
-import affine_stitcher.rectificator
+import fb_stitcher.rectificator
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import logging.config
-import affine_stitcher.helpers as helpers
+import fb_stitcher.helpers as helpers
 
 logging.config.fileConfig('logging_config.ini')
 
@@ -28,7 +28,7 @@ pts_right_org = np.array([[[428, 80], [429, 1312], [419, 2752], [3729, 99], [
 img_l_m = draw_makers(img_l, pts_left_org, (255, 0, 0), cv2.MARKER_CROSS)
 img_r_m = draw_makers(img_r, pts_right_org, (255, 0, 0), cv2.MARKER_CROSS)
 
-rect = affine_stitcher.rectificator.Rectificator()
+rect = fb_stitcher.rectificator.Rectificator()
 
 imgl, imgr = rect.rectify_images(img_l_m, img_r_m)
 helpers.display(imgl)

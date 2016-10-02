@@ -1,4 +1,4 @@
-import affine_stitcher.helpers as helpers
+import fb_stitcher.helpers as helpers
 import logging.config
 import numpy as np
 print(helpers.cart_2_pol([1,1]))

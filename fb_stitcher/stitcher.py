@@ -1,4 +1,4 @@
-import affine_stitcher.helpers as helpers
+import fb_stitcher.helpers as helpers
 import numpy as np
 import cv2
 from logging import getLogger
