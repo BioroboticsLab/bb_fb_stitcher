@@ -12,7 +12,8 @@ setup(
         'console_scripts': [
             'bb_fg_subtract = fb_stitcher.scripts.bb_fg_subtract:main',
             'bb_fb_stitcher = fb_stitcher.scripts.bb_fb_stitcher:main',
-            'bb_stitch_videos = fb_stitcher.scripts.bb_stitch_videos:main'
+            'bb_stitch_videos = fb_stitcher.scripts.bb_stitch_videos:main',
+            'bb_stitch_images = fb_stitcher.scripts.bb_stitch_images:main'
         ]
     },
     url='https://github.com/gitmirgut/bb_affine_stitcher',
