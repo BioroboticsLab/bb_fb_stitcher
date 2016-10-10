@@ -3,6 +3,7 @@
 ## Usage
 
 Stitching process for points is divided in 3 steps:
+
 1. Foreground Subtraction
 2. Stitching background images
 3. Map Coordinates
