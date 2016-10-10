@@ -16,8 +16,8 @@ class BB_FeatureBasedStitcher(object):
 
     def __init__(self, transform=Transformation.AFFINE):
         """Initialize feature based Stitcher."""
-        self.idx_left = None
-        self.idx_right = None
+        self.camIdx_left = None
+        self.camIdx_right = None
         self.whole_transform_left = None
         self.whole_transform_right = None
         self.pano_size = None
@@ -39,8 +39,8 @@ class BB_FeatureBasedStitcher(object):
                 'homo_l = \n{},\n'
                 'homo_r = \n{},\n'
                 ).format(self.__class__.__name__,
-                         self.idx_left,
-                         self.idx_right,
+                         self.camIdx_left,
+                         self.camIdx_right,
                          self.img_l_size,
                          self.img_r_size,
                          self.pano_size,
@@ -51,7 +51,7 @@ class BB_FeatureBasedStitcher(object):
         """Calculate Stitching data for further stitching."""
         (self.cached_img_l, self.cached_img_r) = images
         if camIdxs is not None:
-            (self.idx_left, self.idx_right) = camIdxs
+            (self.camIdx_left, self.camIdx_right) = camIdxs
 
         # save the original size of the images
         self.img_l_size = tuple(
@@ -172,11 +172,19 @@ class BB_FeatureBasedStitcher(object):
         """Map Points from right Comb side to panorama."""
         return self.map_coordinates(points, self.whole_transform_right, self.img_r_size)
 
+    def map_cam_coordinates(self, camIdx, points):
+        if camIdx == self.camIdx_left:
+            return self.map_left_coordinates(points)
+        elif camIdx == self.camIdx_right:
+            return self.map_right_coordinates(points)
+        else:
+            return None
+
     def save_data(self, path):
         """Save data for further stitching to file."""
         np.savez(path,
-                 idx_left=self.idx_left,
-                 idx_right=self.idx_right,
+                 camIdx_left=self.camIdx_left,
+                 camIdx_right=self.camIdx_right,
                  img_l_size=self.img_l_size,
                  img_r_size=self.img_r_size,
                  whole_transform_left=self.whole_transform_left,
@@ -188,8 +196,8 @@ class BB_FeatureBasedStitcher(object):
     def load_data(self, path):
         """Load data from previous stitching process."""
         with np.load(path) as data:
-            self.idx_left = data['idx_left']
-            self.idx_right = data['idx_right']
+            self.camIdx_left = data['camIdx_left']
+            self.camIdx_right = data['camIdx_right']
 
             # savez doen't save the tuple info
             self.img_l_size = tuple(data['img_l_size'])
