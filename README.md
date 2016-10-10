@@ -1,5 +1,8 @@
 # bb_affine_stitcher
 
+## Requirements
+
+
 ## Usage
 
 Stitching process for points is divided in 3 steps:
