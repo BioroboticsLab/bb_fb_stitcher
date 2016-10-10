@@ -24,3 +24,9 @@ DIST_C = np.array(
 #  max vertical shift value of images, defines how much the features of left and
 #  right image can be differ from each other in the y-direction.
 SHIFT = 200
+
+# valid BeesBook videofilenames
+FILE_NAMES = ( '^Cam_\d_\d{14}_\d{3,6}_TO_Cam_\d_\d{14}_\d{3,6}.jpg$|'
+                '^Cam_\d_\d{14}_\d_TO_Cam_\d_\d{14}_\d.jpg$|'
+                '^Cam_\d_\d{14}__\d_TO_Cam_\d_\d{14}__\d.jpg$|'
+                '^Cam_\d_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6}Z--\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6}Z.jpg$')

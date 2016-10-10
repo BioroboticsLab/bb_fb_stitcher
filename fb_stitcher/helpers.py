@@ -3,6 +3,8 @@ from logging import getLogger
 import cv2
 import fb_stitcher.config as config
 import math
+import re
+import os
 
 log = getLogger(__name__)
 
@@ -206,3 +208,15 @@ def overlay_images(foreground_image, background_image):
             if cell[3] == 0:
                 result[r][c] = background_image[r][c]
     return result
+
+def check_filename(filename):
+    """Check if the filename is a valid background image."""
+    correct_pattern = re.compile(config.FILE_NAMES)
+    return None is not re.match(correct_pattern, filename)
+
+def get_CamIdx(filename):
+    if not check_filename(filename):
+        return None
+    basename = os.path.basename(filename)
+    camIdStr = basename.split('_', 2)[1]
+    return int(camIdStr)
