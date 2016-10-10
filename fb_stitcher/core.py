@@ -30,6 +30,23 @@ class BB_FeatureBasedStitcher(object):
 
         self.transform = transform
 
+    def __repr__(self):
+        return ('{}(\nidx_l = {},'
+                ' idx_r = {},\n'
+                'sz_l = {},'
+                ' sz_r = {}\n'
+                'sz_p = {}\n'
+                'homo_l = \n{},\n'
+                'homo_r = \n{},\n'
+                ).format(self.__class__.__name__,
+                         self.idx_left,
+                         self.idx_right,
+                         self.img_l_size,
+                         self.img_r_size,
+                         self.pano_size,
+                         self.whole_transform_left,
+                         self.whole_transform_right)
+
     def __call__(self, images, camIdxs=None, angles=(90, -90)):
         """Calculate Stitching data for further stitching."""
         (self.cached_img_l, self.cached_img_r) = images
@@ -158,12 +175,12 @@ class BB_FeatureBasedStitcher(object):
     def save_data(self, path):
         """Save data for further stitching to file."""
         np.savez(path,
+                 idx_left=self.idx_left,
+                 idx_right=self.idx_right,
                  img_l_size=self.img_l_size,
                  img_r_size=self.img_r_size,
                  whole_transform_left=self.whole_transform_left,
                  whole_transform_right=self.whole_transform_right,
-                 idx_left=self.idx_left,
-                 idx_right=self.idx_right,
                  pano_size=self.pano_size
                  )
         log.info('Stitcher arguments saved to {}'.format(path))
@@ -171,12 +188,13 @@ class BB_FeatureBasedStitcher(object):
     def load_data(self, path):
         """Load data from previous stitching process."""
         with np.load(path) as data:
+            self.idx_left = data['idx_left']
+            self.idx_right = data['idx_right']
+
             # savez doen't save the tuple info
             self.img_l_size = tuple(data['img_l_size'])
             self.img_r_size = tuple(data['img_r_size'])
             self.whole_transform_left = data['whole_transform_left']
             self.whole_transform_right = data['whole_transform_right']
-            self.idx_left = data['idx_left']
-            self.idx_right = data['idx_right']
             self.pano_size = tuple(data['pano_size'])
         log.info('Stitcher arguments loaded from {}'.format(path))
