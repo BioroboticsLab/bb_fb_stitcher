@@ -16,6 +16,8 @@ class BB_FeatureBasedStitcher(object):
 
     def __init__(self, transform=Transformation.AFFINE):
         """Initialize feature based Stitcher."""
+        self.idx_left = None
+        self.idx_right = None
         self.whole_transform_left = None
         self.whole_transform_right = None
         self.pano_size = None
@@ -28,9 +30,11 @@ class BB_FeatureBasedStitcher(object):
 
         self.transform = transform
 
-    def __call__(self, images, angles=(90, -90)):
+    def __call__(self, images, camIdxs=None, angles=(90, -90)):
         """Calculate Stitching data for further stitching."""
         (self.cached_img_l, self.cached_img_r) = images
+        if camIdxs is not None:
+            (self.idx_left, self.idx_right) = camIdxs
 
         # save the original size of the images
         self.img_l_size = tuple(
@@ -158,6 +162,8 @@ class BB_FeatureBasedStitcher(object):
                  img_r_size=self.img_r_size,
                  whole_transform_left=self.whole_transform_left,
                  whole_transform_right=self.whole_transform_right,
+                 idx_left=self.idx_left,
+                 idx_right=self.idx_right,
                  pano_size=self.pano_size
                  )
         log.info('Stitcher arguments saved to {}'.format(path))
@@ -170,5 +176,7 @@ class BB_FeatureBasedStitcher(object):
             self.img_r_size = tuple(data['img_r_size'])
             self.whole_transform_left = data['whole_transform_left']
             self.whole_transform_right = data['whole_transform_right']
+            self.idx_left = data['idx_left']
+            self.idx_right = data['idx_right']
             self.pano_size = tuple(data['pano_size'])
         log.info('Stitcher arguments loaded from {}'.format(path))
