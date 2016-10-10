@@ -11,9 +11,9 @@
 
 Stitching process for points is divided in 3 steps:
 
-1. [Foreground Subtraction](#1-Foreground-Subtraction)
-2. Stitching background images
-3. Map Coordinates
+1. [Foreground Subtraction](#1-foreground-fubtraction)
+2. [Stitching background images](#2-stitching-background-images)
+3. [Map Coordinates](#3-mapping-points)
 
 ### 1. Foreground Subtraction
 ```bash
