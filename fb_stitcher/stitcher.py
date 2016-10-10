@@ -1,17 +1,19 @@
+import cv2
 import fb_stitcher.helpers as helpers
 import numpy as np
-import cv2
 from logging import getLogger
 from enum import Enum
 
 draw_params = dict(matchColor=(0, 255, 0),
                    outImg=None,
-                   flags = 2
+                   flags=2
                    )
 
 log = getLogger(__name__)
 
+
 class Transformation(Enum):
+    """Enumeration to define the possible transformations."""
     TRANSLATION = 0
     EUCLIDEAN = 1
     SIMILARITY = 2
@@ -19,17 +21,24 @@ class Transformation(Enum):
     PROJECTIVE = 4
 
 class FeatureBasedStitcher(object):
+    """Class to execute a feature based Stitching."""
 
-    def __init__(self, overlap=None, border=None, transformation = Transformation.AFFINE):
+    def __init__(self, overlap=None, border=None, transformation=Transformation.AFFINE):
         # cached the homography
         self.cached_homo = None
+
+        # defines the estimated overlap in pixels
         self.overlap = overlap
+
+        # defines the border from top and bottom
+        # this excludes the area on top and bottom for searching of features
         self.border = border
         self.transformation = transformation
         self.cached_right_img = None
         self.cached_right_img = None
 
     def __call__(self, images, drawMatches=False):
+        """Calculate the homographie to map right image to the left one."""
 
         # get the images
         (self.cached_left_img, self.cached_right_img) = images
@@ -45,11 +54,13 @@ class FeatureBasedStitcher(object):
                 self.cached_left_img, left_mask, True)
             (right_kps, right_ds, right_features) = self.get_keypoints_and_descriptors(
                 self.cached_right_img, right_mask, True)
+
             # helpers.display(right_features, time=500)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
             assert(len(left_kps)>0 and len(right_kps)>0)
-            # selection of the planar transformation and searching for the right homography
+
+            # select planar transformation and search for the right homography
             if self.transformation == Transformation.PROJECTIVE:
                 (self.cached_homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.AFFINE:
@@ -65,18 +76,20 @@ class FeatureBasedStitcher(object):
                 return None
             log.info('Transformation matrix found.')
 
-        # Creates Panorama from images
         log.debug('TM =\n{}'.format(self.cached_homo))
 
         if drawMatches:
             matchesMask = mask_good.ravel().tolist()
             result_matches = cv2.drawMatches(
-                self.cached_left_img, left_kps, self.cached_right_img, right_kps, good_matches, matchesMask=None, **draw_params)
+                self.cached_left_img, left_kps, self.cached_right_img,
+                right_kps, good_matches, matchesMask=None, **draw_params)
+
             return self.cached_homo, result_matches
 
         return self.cached_homo
 
     def calc_feature_masks(self, left_shape, right_shape):
+        """Calculate the mask, which define area for feature detection."""
         left_mask = np.ones(left_shape, np.uint8)*255
         right_mask = np.ones(right_shape, np.uint8)*255
         if self.overlap is not None:
@@ -91,6 +104,7 @@ class FeatureBasedStitcher(object):
 
     @staticmethod
     def get_keypoints_and_descriptors(img, mask=None, drawMatches=False):
+        """Search for Features in <img>."""
         # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # TODO opencv versions check
@@ -109,6 +123,7 @@ class FeatureBasedStitcher(object):
 
     @staticmethod
     def transform_projective(left_kps, right_kps, left_ds, right_ds):
+        """Determine projective transform which fits best to map right kps to left kps."""
         bf = cv2.BFMatcher()
         log.info('Start matching Features.')
         raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
@@ -125,6 +140,7 @@ class FeatureBasedStitcher(object):
 
     @staticmethod
     def transform_affine(left_kps, right_kps, left_ds, right_ds):
+        """Determine affine transform which fits best to map right kps to left kps."""
         (homo, mask_good,
          good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
                                                                    right_kps,
@@ -147,6 +163,7 @@ class FeatureBasedStitcher(object):
 
     @staticmethod
     def transform_euclidean(left_kps, right_kps, left_ds, right_ds):
+        """Determine euclidean transform which fits best to map right kps to left kps."""
         (homo, mask_good,
          good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
                                                                    right_kps,
@@ -168,6 +185,7 @@ class FeatureBasedStitcher(object):
 
     @staticmethod
     def transform_translation(left_kps, right_kps, left_ds, right_ds):
+        """Determine translation which fits best to map right kps to left kps."""
         (homo, mask_good,
          good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
                                                                    right_kps,
@@ -192,7 +210,7 @@ class FeatureBasedStitcher(object):
             return translation, mask_top, top_matches
         return None
 
-    def warp_images(self, left_img = None, right_img = None):
+    def warp_images(self, left_img=None, right_img=None):
         if left_img is None:
             left_img = self.cached_left_img
         if right_img is None:
