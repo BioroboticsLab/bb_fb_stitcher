@@ -58,8 +58,9 @@ class BB_FeatureBasedStitcher(object):
         self.whole_transform_right = homo.dot(img_r_ro_mat)
 
         # will align the 'real' panorama with display area
-        trans_m, self.pano_size = helpers.get_translation(img_l.shape[:2], img_r.shape[
-                                                          :2], self.whole_transform_left, self.whole_transform_right)
+        trans_m, self.pano_size = helpers.get_translation(
+            img_l.shape[:2], img_r.shape[:2],
+            self.whole_transform_left, self.whole_transform_right)
         log.debug('new_size =\n{}'.format(self.pano_size))
 
         # calculate the overall homography including the previous translation
@@ -68,7 +69,8 @@ class BB_FeatureBasedStitcher(object):
 
         # returns all needed data for further stitching of images shot with the
         # same camerasetup
-        return self.img_l_size, self.img_l_size, self.whole_transform_left, self.whole_transform_right, self.pano_size
+        return (self.img_l_size, self.img_l_size, self.whole_transform_left,
+                self.whole_transform_right, self.pano_size)
 
     @staticmethod
     def transform_image(img, homography, pano_size):
