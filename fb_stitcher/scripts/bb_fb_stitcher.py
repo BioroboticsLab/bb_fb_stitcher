@@ -1,15 +1,37 @@
 import fb_stitcher.core as core
 from fb_stitcher.stitcher import Transformation
 import argparse
+import fb_stitcher.helpers as helpers
 import cv2
 from argparse import RawTextHelpFormatter
+import os
 
 def process_images(args):
+    # checks if filenames are valid
+    assert helpers.check_filename(args.left) and helpers.check_filename(args.right)
+
+    if os.path.isdir(args.data):
+        start_time_l = helpers.get_start_datetime(args.left)
+        start_time_r = helpers.get_start_datetime(args.right)
+        output_path = ''.join([start_time_l, '_ST_', start_time_r, '.npz'])
+        file_path = os.path.join(args.data, output_path)
+    else:
+        file_path = args.data
+
+
+    camIdx_l = helpers.get_CamIdx(args.left)
+    camIdx_r = helpers.get_CamIdx(args.right)
+    assert camIdx_l in [0, 1, 2, 3] and camIdx_r in [0, 1, 2, 3]
+
     img_l =cv2.imread(args.left, -1)
     img_r =cv2.imread(args.right, -1)
+
     bb_stitcher_fb = core.BB_FeatureBasedStitcher(Transformation(args.transform))
-    bb_stitcher_fb((img_l, img_r),(args.left_angle, args.right_angle))
-    bb_stitcher_fb.save_data(args.data)
+    bb_stitcher_fb((img_l, img_r),(camIdx_l, camIdx_r),(args.left_angle, args.right_angle))
+
+    bb_stitcher_fb.save_data(file_path)
+    print('Saved stitching params to: {} '.format(file_path))
+
     if args.pano is not None:
         result = bb_stitcher_fb.overlay_images()
         cv2.imwrite(args.pano[0], result)
@@ -32,7 +54,7 @@ def main():
                                           '(2 - SIMILARITY)\n'
                                           ' 3 - AFFINE\n'
                                           ' 4 - PROJECTIVE', type=int, choices=[0,1,3,4])
-    parser.add_argument('data', help='Output path of the stitching data.', type=str)
+    parser.add_argument('data', help='Output directory/path of the stitching data.', type=str)
     parser.add_argument('--pano', '-p', nargs=1, help='Path of the panorama.')
 
     args = parser.parse_args()

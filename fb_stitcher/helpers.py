@@ -223,3 +223,9 @@ def get_CamIdx(filename):
         return None
     camIdxStr = basename.split('_', 2)[1]
     return int(camIdxStr)
+
+
+def get_start_datetime(filename):
+    basename = os.path.basename(filename)
+    datetime = re.split('--|_TO_', basename)[0]
+    return datetime
