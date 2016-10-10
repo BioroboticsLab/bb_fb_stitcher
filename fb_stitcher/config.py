@@ -21,11 +21,6 @@ DIST_C = np.array(
     [RDIST_M[0], RDIST_M[1], TDIST_M[0], TDIST_M[1], RDIST_M[2]])
 
 
-#  max vertical shift value of images
+#  max vertical shift value of images, defines how much the features of left and
+#  right image can be differ from each other in the y-direction.
 SHIFT = 200
-# ______
-#       |
-#       |
-# left  |
-#       |
-#_______|
