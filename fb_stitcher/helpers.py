@@ -8,6 +8,7 @@ log = getLogger(__name__)
 
 
 def lowe_ratio_test(matches, ratio=0.75):
+    """Execute Lowe's ration test."""
     good_matches = []
     for m in matches:
         if len(m) == 2 and m[0].distance < ratio * m[1].distance:
@@ -17,37 +18,46 @@ def lowe_ratio_test(matches, ratio=0.75):
 
 
 def get_matching_points(kps1, kps2, matches):
+    """Return the matching points of kps1, kps2"""
     pts1 = np.float32([kps1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
     pts2 = np.float32([kps2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
     return pts1, pts2
 
 
 def get_top_matches(kps1, kps2, matches, num=None):
+    """Return the the <num> Top matches with the minimum distance to each other."""
+
+    # Sort matches by the distance (hamming) of their points.
     top_matches = sorted(matches, key=lambda m: m.distance)[:num]
     pts1, pts2 = get_matching_points(kps1, kps2, top_matches)
     return pts1, pts2, top_matches
 
 
 def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift=config.SHIFT):
+    """Estimate the best matches with a max_shift in y-direction."""
     good_matches = []
     for m in matches:
         if len(m) == 2 and m[0].distance < ratio * m[1].distance:
             m = m[0]
+
+            # Checks the distance of the points in the y-direction.
             dist = abs(np.array(kps1[m.queryIdx].pt)-np.array(kps2[m.trainIdx].pt))
             if dist[1] < max_shift:
                 good_matches.append(m)
-    # good_matches = lowe_ratio_test(matches, ratio)
+
     pts1, pts2 = get_matching_points(kps1, kps2, good_matches)
     return pts1, pts2, good_matches
 
 
 def get_points_n_matches_affine(kps1, kps2, matches, ratio=0.75):
+    """Get the best 3 points with the smallest distance to each other."""
     good_matches = lowe_ratio_test(matches, ratio)
     pts1, pts2, best_matches = get_top_matches(kps1, kps2, good_matches, 3)
     return pts1, pts2, best_matches
 
 
 def get_mask_matches(matches, mask):
+    """Return the masked matches."""
     good_matches = []
     for i, m in enumerate(matches):
         if mask[i] == 1:
@@ -56,6 +66,7 @@ def get_mask_matches(matches, mask):
 
 
 def calculate_num_matches(mask):
+    """Count the number of good matches from mask."""
     i = 0
     for m in mask:
         if m == 1:
@@ -64,6 +75,7 @@ def calculate_num_matches(mask):
 
 
 def display(im, title='image', time=0):
+    """Display image."""
     left_h, left_w = im.shape[:2]
     sh = 800
     sw = int(left_w * sh / left_h)
@@ -74,6 +86,7 @@ def display(im, title='image', time=0):
 
 
 def subtract_foreground(cap, show=False):
+    """Subtract the moving foreground of an video."""
     fgbg = cv2.createBackgroundSubtractorMOG2()
     bgimg = None
     try:
@@ -100,12 +113,14 @@ def subtract_foreground(cap, show=False):
 
 
 def cart_2_pol(pt):
+    """Convert cartesian coordinate to polar coordinate."""
     rho = np.sqrt(pt[0]**2+pt[1]**2)
     phi = math.degrees(np.arctan2(pt[1], pt[0]))
     return rho, phi
 
 
 def get_euclid_transform_mat(center_l, center_r, pt_l, pt_r):
+    """Calculate the euclidean transformation of two point pairs."""
 
     # get the translation vector
     tr_vec = np.subtract(center_l, center_r)
@@ -143,12 +158,14 @@ def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
     """Determine the translation matrix of two transformed images.
     When two images have been transformed by an homography, it's possible
     that they are not aligned with the displayed area anymore. So they need to
-    be translated.
+    be translated and the display area must be increased.
     """
-    # get origina width and height of images
+    # get origin width and height of images
     w_l, h_l = shape_l
     w_r, h_r = shape_r
     log.debug('(h_l,w_l) = {}'.format(shape_l))
+
+    # define the corners of the left and right image.
     corners_l = np.float32([
         [0, 0],
         [0, w_l],
