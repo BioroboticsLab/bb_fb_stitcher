@@ -1,6 +1,6 @@
 """Main Class of the feature based stitcher for the Beesbook Project."""
 import cv2
-import fb_stitcher.helpers as helpers.
+import fb_stitcher.helpers as helpers
 import fb_stitcher.rectificator as rect
 import fb_stitcher.rotator as rot
 import fb_stitcher.stitcher as stitch
