@@ -6,6 +6,7 @@ log = getLogger(__name__)
 
 
 class Rotator(object):
+    """Class to rotate image and to adjust the displayed area."""
 
     def __init__(self, shape=None, angle=None):
         self.shape = shape
@@ -17,6 +18,7 @@ class Rotator(object):
             self.__get_affine_mat(shape, angle)
 
     def __get_affine_mat(self, shape, angle):
+        """Calculate the affine transformation to rote image by given angle."""
         self.angle = angle
         self.shape = shape
         log.info('Start searching rotation_mat for angle {} and shape {}'.format(angle, shape))
@@ -63,9 +65,11 @@ class Rotator(object):
         return self.affine_mat
 
     def rotate_image(self, image, angle, ret=False):
+        """Rotate image by given angle."""
         not_cached = self.affine_mat is None or self.size_new is None
         changed_val = self.shape != image.shape[:2] or self.angle != angle
 
+        # Checks if previous an image with same properties has been rotated.
         if not_cached or changed_val:
             self.__get_affine_mat(image.shape[:2], angle)
 
@@ -75,6 +79,7 @@ class Rotator(object):
         return rot_image
 
     def rotate_points(self, pts, angle=None, shape=None):
+        """Rotate points in relation to image."""
         log.debug('Start rotate points.')
         if shape is None:
             shape = self.shape
