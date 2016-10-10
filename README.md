@@ -32,11 +32,11 @@ the overall coordinate system of one comb side will be saved to a file.
 $ bb_fb_stitcher <path_left_img> <angle_left_rot> <path_right_img> <angle_right_rot> <transformation_type> <data_out> -p <preview_img>
 ```
 
-`<path_*_img>` - Path to the input images.
-`<angle_*_rot>` - initial Rotation angle of both images. Rotation ist measured counterclockwise.
-`<transfromation_type>` - defines the transformation used to stitch both images.
-`<data_out>` - path for the stitching data, required for further stitching or mapping points. If its a directory, the filename will be 'stitched' of the both input images (```Cam_0_2016-09-01T14:20:38.410765Z_ST_Cam_1_2016-09-01T14:16:13.311603Z.npz```)
-`-p <preview_img>` - creates an preview of the stitched images. (optional)
+* `<path_*_img>` - Path to the input images.
+* `<angle_*_rot>` - initial Rotation angle of both images. Rotation ist measured counterclockwise.
+* `<transfromation_type>` - defines the transformation used to stitch both images.
+* `<data_out>` - path for the stitching data, required for further stitching or mapping points. If its a directory, the filename will be 'stitched' of the both input images (```Cam_0_2016-09-01T14:20:38.410765Z_ST_Cam_1_2016-09-01T14:16:13.311603Z.npz```)
+* `-p <preview_img>` - creates an preview of the stitched images. (optional)
 
 (See also `$ bb_fb_stitcher -h`)
 
