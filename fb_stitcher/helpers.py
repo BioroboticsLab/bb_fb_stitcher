@@ -27,6 +27,7 @@ def get_top_matches(kps1, kps2, matches, num=None):
     pts1, pts2 = get_matching_points(kps1, kps2, top_matches)
     return pts1, pts2, top_matches
 
+
 def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift=config.SHIFT):
     good_matches = []
     for m in matches:
@@ -100,7 +101,7 @@ def subtract_foreground(cap, show=False):
 
 def cart_2_pol(pt):
     rho = np.sqrt(pt[0]**2+pt[1]**2)
-    phi = math.degrees(np.arctan2(pt[1],pt[0]))
+    phi = math.degrees(np.arctan2(pt[1], pt[0]))
     return rho, phi
 
 
@@ -120,10 +121,8 @@ def get_euclid_transform_mat(center_l, center_r, pt_l, pt_r):
     rot_angle = trans_pt_r[1] - pt_l[1]
 
     # -rot_angle opencv measures angle counter clockwise
-    rotation_mat = np.vstack([cv2.getRotationMatrix2D((0,0), -rot_angle, 1.0),
+    rotation_mat = np.vstack([cv2.getRotationMatrix2D((0, 0), -rot_angle, 1.0),
                              [0, 0, 1]])
-
-
 
     log.debug('Euclidean rotation matrix = \n{}'.format(rotation_mat))
 
@@ -138,6 +137,7 @@ def get_euclid_transform_mat(center_l, center_r, pt_l, pt_r):
     log.debug('Euclidean Transformation =\n{}'.format(euclidean))
 
     return euclidean
+
 
 def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
     """Determine the translation matrix of two transformed images.
@@ -180,6 +180,7 @@ def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
     total_size = (xmax - xmin, ymax - ymin)
 
     return trans_m, total_size
+
 
 def overlay_images(foreground_image, background_image):
     result = np.copy(foreground_image)
