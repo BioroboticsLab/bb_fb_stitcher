@@ -1,7 +1,7 @@
 # bb_affine_stitcher
 
 ## Requirements
-* [OpenCV3](https://github.com/opencv/opencv) 
+* [OpenCV3](https://github.com/opencv/opencv)
 * [opencv_contrib](https://github.com/opencv/opencv_contrib) (only required for step 2)
 * [FFmpeg](https://trac.ffmpeg.org/wiki/CompilationGuide) with H.265/HEVC (only required for step 1)
 
@@ -14,13 +14,13 @@ Stitching process for points is divided in 3 steps:
 1. [Foreground Subtraction](#1-foreground-fubtraction)
 2. [Stitching background images](#2-stitching-background-images)
 3. [Map Coordinates](#3-mapping-points)
-
+4. [Dockerfile](#4-dockerfile)
 ### 1. Foreground Subtraction
 ```bash
 $  bb_fg_subtract <video_path> <output_directory>
 ```
 This will subtract the moving foreground (bees) from the video and will
-return an image of background (comb without bees). 
+return an image of background (comb without bees).
 If you didn't want to install the whole package on the system like on HLRN,
 you can use this [script](https://gist.github.com/gitmirgut/3617b94094df918b956662de6d792827).
 
@@ -67,9 +67,16 @@ pts_left_org = np.array([[[1000, 3000], [353, 400], [369, 2703]]]).astype(np.flo
 stitcher = core.BB_FeatureBasedStitcher()
 stitcher.load_data('Cam_0_2016-09-01T14:20:38.410765Z_ST_Cam_1_2016-09-01T14:16:13.311603Z.npz')
 
-# 'stitch' points 
+# 'stitch' points
 pts_mapped = stitcher.map_cam_coordinates(camIdx, pts_left_org)
 
 print(pts_mapped)
 ```
 returns `[[[ 2990.34596943  3098.03015643] [  396.12205245  3725.00678215] [ 2694.5516094   3727.65687635]]]`
+
+### 4. Dockerfile
+Dockerfile with OpenCV3:
+```bash
+$ docker pull gitmirgut/bb_fb_stitcher
+$ docker run -it -v   HOST_DIR:/storage bb_fb_stitcher
+```
