@@ -15,6 +15,7 @@ Stitching process for points is divided in 3 steps:
 2. [Stitching background images](#2-stitching-background-images)
 3. [Map Coordinates](#3-mapping-points)
 4. [Dockerfile](#4-dockerfile)
+
 ### 1. Foreground Subtraction
 ```bash
 $  bb_fg_subtract <video_path> <output_directory>
