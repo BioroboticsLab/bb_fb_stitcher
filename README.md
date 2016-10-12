@@ -76,8 +76,8 @@ print(pts_mapped)
 returns `[[[ 2990.34596943  3098.03015643] [  396.12205245  3725.00678215] [ 2694.5516094   3727.65687635]]]`
 
 ### 4. Dockerfile
-Dockerfile with OpenCV3:
+Dockerfile with OpenCV3 and ffmpeg:
 ```bash
 $ docker pull gitmirgut/bb_fb_stitcher
-$ docker run -it -v   HOST_DIR:/storage bb_fb_stitcher
+$ docker run -it -v   HOST_DIR:/storage gitmirgut/bb_fb_stitcher
 ```
