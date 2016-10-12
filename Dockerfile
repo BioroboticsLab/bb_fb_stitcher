@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
     python-numpy \
     libtbb2 \
     libtbb-dev \
-
+    ffmpeg \
     wget
 
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
