@@ -10,13 +10,15 @@ def process_images(args):
     # checks if filenames are valid
     assert helpers.check_filename(args.left) and helpers.check_filename(args.right)
 
+    start_time_l = helpers.get_start_datetime(args.left)
+    start_time_r = helpers.get_start_datetime(args.right)
+    out_basename = ''.join([str(args.transform), '_', start_time_l, '_ST_', start_time_r])
+
     if os.path.isdir(args.data):
-        start_time_l = helpers.get_start_datetime(args.left)
-        start_time_r = helpers.get_start_datetime(args.right)
-        output_path = ''.join([start_time_l, '_ST_', start_time_r, '.npz'])
-        file_path = os.path.join(args.data, output_path)
+        data_basename = ''.join([out_basename, '.npz'])
+        data_path = os.path.join(args.data, data_basename)
     else:
-        file_path = args.data
+        data_path = args.data
 
 
     camIdx_l = helpers.get_CamIdx(args.left)
@@ -29,12 +31,17 @@ def process_images(args):
     bb_stitcher_fb = core.BB_FeatureBasedStitcher(Transformation(args.transform))
     bb_stitcher_fb((img_l, img_r),(camIdx_l, camIdx_r),(args.left_angle, args.right_angle))
 
-    bb_stitcher_fb.save_data(file_path)
-    print('Saved stitching params to: {} '.format(file_path))
+    bb_stitcher_fb.save_data(data_path)
+    print('Saved stitching params to: {} '.format(data_path))
 
     if args.pano is not None:
+        if os.path.isdir(args.pano[0]):
+            pano_basename = ''.join([out_basename, '.jpg'])
+            pano_path = os.path.join(args.pano[0], pano_basename)
+        else:
+            pano_path = args.pano[0]
         result = bb_stitcher_fb.overlay_images()
-        cv2.imwrite(args.pano[0], result)
+        cv2.imwrite(pano_path, result)
 
 
 def main():
