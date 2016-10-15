@@ -223,7 +223,7 @@ class FeatureBasedStitcher(object):
 
 
     # deprecated
-    @staticmethod
+    @DeprecationWarning
     def get_best_3_matches(left_kps, right_kps, left_ds, right_ds):
         bf = cv2.BFMatcher()
         log.info('Start matching Features.')
