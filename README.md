@@ -37,7 +37,7 @@ the required data for mapping locations (detected in the bb_pipeline) to
 the overall coordinate system of one comb side will be saved to a file.
 
 ```bash
-$ bb_fb_stitcher <path_left_img> <angle_left_rot> <path_right_img> <angle_right_rot> <transformation_type> <data_out> -p <preview_img>
+$ bb_fb_stitcher <path_left_img> <path_right_img> <angle_left_rot> <angle_right_rot> <transformation_type> <data_out> -p <preview_img>
 ```
 
 * `<path_*_img>` - Path to the input images.
@@ -50,7 +50,7 @@ $ bb_fb_stitcher <path_left_img> <angle_left_rot> <path_right_img> <angle_right_
 
 *Example:*
 ```bash
-$ bb_fb_stitcher Cam_0_2016-09-01T14\:20\:38.410765Z--2016-09-01T14\:26\:18.257648Z.jpg 90 Cam_1_2016-09-01T14\:16\:13.311603Z--2016-09-01T14\:21\:53.157900Z.jpg -90 3 dir_for_params/ -p preview.jpg
+$ bb_fb_stitcher Cam_0_2016-09-01T14\:20\:38.410765Z--2016-09-01T14\:26\:18.257648Z.jpg Cam_1_2016-09-01T14\:16\:13.311603Z--2016-09-01T14\:21\:53.157900Z.jpg 90 -90 3 dir_for_params/ -p preview.jpg
 ```
 
 ### 3. Mapping Points

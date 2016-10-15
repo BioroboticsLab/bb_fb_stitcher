@@ -52,8 +52,8 @@ def main():
         formatter_class=RawTextHelpFormatter
     )
     parser.add_argument('left', help='Path of the left image.', type=str)
-    parser.add_argument('left_angle', help='Rotation angle of the left image', type=int)
     parser.add_argument('right', help='Path of the left image.', type=str)
+    parser.add_argument('left_angle', help='Rotation angle of the left image', type=int)
     parser.add_argument('right_angle', help='Rotation angle of the right image', type=int)
     parser.add_argument('transform', help='Type of Transformation: \n'
                                           ' 0 - Translation\n'
