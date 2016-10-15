@@ -49,7 +49,8 @@ class Rotator(object):
         # get the rectangle which would surround the rotated image
         __, __, w, h = cv2.boundingRect(np.array(corners_rotated))
 
-        self.size_new = (w, h)
+        # boundigRect is 1px bigger so remove it
+        self.size_new = (w-1, h-1)
         log.debug('size_new = {}'.format(self.size_new))
 
         # matrix to center the rotated image
@@ -70,8 +71,8 @@ class Rotator(object):
         changed_val = self.shape != image.shape[:2] or self.angle != angle
 
         # Checks if previous an image with same properties has been rotated.
-        if not_cached or changed_val:
-            self.__get_affine_mat(image.shape[:2], angle)
+        # if not_cached or changed_val:
+        self.__get_affine_mat(image.shape[:2], angle)
 
         rot_image = cv2.warpPerspective(image, self.affine_mat, self.size_new)
         if ret:
