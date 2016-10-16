@@ -16,7 +16,7 @@ class Composer(object):
         quadri_right = sort_pts(points_right[0])
         log.debug('points right sorted = {}'.format(quadri_left))
         rect_dest, hor_l = find_rect(quadri_left, quadri_right)
-        homo_mat_l, homo_mat_r = find_homographys(
+        homo_mat_l, homo_mat_r = find_homographies(
             quadri_left, quadri_right, rect_dest)
         return homo_mat_l, homo_mat_r
 

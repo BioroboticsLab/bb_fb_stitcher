@@ -14,13 +14,14 @@ setup(
             'bb_fg_subtract = fb_stitcher.scripts.bb_fg_subtract:main',
             'bb_fb_stitcher = fb_stitcher.scripts.bb_fb_stitcher:main',
             'bb_stitch_videos = fb_stitcher.scripts.bb_stitch_videos:main',
-            'bb_stitch_images = fb_stitcher.scripts.bb_stitch_images:main'
+            'bb_stitch_images = fb_stitcher.scripts.bb_stitch_images:main',
+            'bb_sel_stitcher = fb_stitcher.scripts.bb_sel_stitcher:main'
         ]
     },
     url='https://github.com/gitmirgut/bb_affine_stitcher',
     author='gitmirgut',
     author_email="gitmirgut@users.noreply.github.com",
-    packages=['fb_stitcher', 'fb_stitcher.scripts'],
+    packages=['fb_stitcher', 'fb_stitcher.scripts', 'fb_stitcher.composer'],
     install_requires=install_reqs,
     dependency_links=dep_links,
     license='GNU GPLv3',
