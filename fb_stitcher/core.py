@@ -3,19 +3,17 @@ import cv2
 import fb_stitcher.helpers as helpers
 import fb_stitcher.rectificator as rect
 import fb_stitcher.rotator as rot
-import fb_stitcher.stitcher as stitch
+import fb_stitcher.stitcher as stitcher
+from fb_stitcher.composer import composer
 from fb_stitcher.stitcher import Transformation
 from logging import getLogger
 import numpy as np
 
 log = getLogger(__name__)
 
+class BB_Stitcher(object):
 
-class BB_FeatureBasedStitcher(object):
-    """Stitching the images of the BeesBook Project."""
-
-    def __init__(self, transform=Transformation.AFFINE):
-        """Initialize feature based Stitcher."""
+    def __init__(self):
         self.camIdx_left = None
         self.camIdx_right = None
         self.whole_transform_left = None
@@ -27,8 +25,6 @@ class BB_FeatureBasedStitcher(object):
 
         self.cached_img_l = None
         self.cached_img_r = None
-
-        self.transform = transform
 
     def __repr__(self):
         return ('{}(\nidx_l = {},'
@@ -47,7 +43,7 @@ class BB_FeatureBasedStitcher(object):
                          self.whole_transform_left,
                          self.whole_transform_right)
 
-    def __call__(self, images, camIdxs=None, angles=(90, -90)):
+    def rectify_n_rotate(self, angles, camIdxs, images):
         """Calculate Stitching data for further stitching."""
         (self.cached_img_l, self.cached_img_r) = images
         if camIdxs is not None:
@@ -58,40 +54,15 @@ class BB_FeatureBasedStitcher(object):
             [self.cached_img_l.shape[1], self.cached_img_l.shape[0]])
         self.img_r_size = tuple(
             [self.cached_img_r.shape[1], self.cached_img_r.shape[0]])
-
         # Initialize the Rectificator with the default params for BeesBook
         # Project and rectify both images
         re = rect.Rectificator()
         img_l, img_r = re.rectify_images(self.cached_img_l, self.cached_img_r)
-
         # Rotate both images
         ro = rot.Rotator()
         img_l_ro, img_l_ro_mat = ro.rotate_image(img_l, angles[0], True)
         img_r_ro, img_r_ro_mat = ro.rotate_image(img_r, angles[1], True)
-
-        # Stitch the rotated and rectified images
-        st = stitch.FeatureBasedStitcher(
-            overlap=400, border=500, transformation=self.transform)
-        homo = st((img_l_ro, img_r_ro))
-
-        # calculate the overall homography including the previous rotation
-        self.whole_transform_left = img_l_ro_mat
-        self.whole_transform_right = homo.dot(img_r_ro_mat)
-
-        # will align the 'real' panorama with display area
-        trans_m, self.pano_size = helpers.get_translation(
-            img_l.shape[:2], img_r.shape[:2],
-            self.whole_transform_left, self.whole_transform_right)
-        log.debug('new_size =\n{}'.format(self.pano_size))
-
-        # calculate the overall homography including the previous translation
-        self.whole_transform_left = trans_m.dot(self.whole_transform_left)
-        self.whole_transform_right = trans_m.dot(self.whole_transform_right)
-
-        # returns all needed data for further stitching of images shot with the
-        # same camerasetup
-        return (self.img_l_size, self.img_l_size, self.whole_transform_left,
-                self.whole_transform_right, self.pano_size)
+        return img_l, img_l_ro, img_l_ro_mat, img_r, img_r_ro, img_r_ro_mat
 
     @staticmethod
     def transform_image(img, homography, pano_size):
@@ -207,3 +178,71 @@ class BB_FeatureBasedStitcher(object):
             self.whole_transform_right = data['whole_transform_right']
             self.pano_size = tuple(data['pano_size'])
         log.info('Stitcher arguments loaded from {}'.format(path))
+
+class BB_FeatureBasedStitcher(BB_Stitcher):
+    """Stitching the images of the BeesBook Project."""
+
+    def __init__(self, transform=Transformation.AFFINE):
+        """Initialize feature based Stitcher."""
+
+        super().__init__()
+        self.transform = transform
+
+
+    def __call__(self, images, camIdxs=None, angles=(90, -90)):
+        """Calculate Stitching data for further stitching."""
+
+        img_l, img_l_ro, img_l_ro_mat, img_r, img_r_ro, img_r_ro_mat = self.rectify_n_rotate(
+            angles, camIdxs, images)
+
+        # Stitch the rotated and rectified images
+        st = stitcher.FeatureBasedStitcher(
+            overlap=400, border=500, transformation=self.transform)
+        homo = st((img_l_ro, img_r_ro))
+
+        # calculate the overall homography including the previous rotation
+        self.whole_transform_left = img_l_ro_mat
+        self.whole_transform_right = homo.dot(img_r_ro_mat)
+
+        # will align the 'real' panorama with display area
+        trans_m, self.pano_size = helpers.get_translation(
+            img_l.shape[:2], img_r.shape[:2],
+            self.whole_transform_left, self.whole_transform_right)
+        log.debug('new_size =\n{}'.format(self.pano_size))
+
+        # calculate the overall homography including the previous translation
+        self.whole_transform_left = trans_m.dot(self.whole_transform_left)
+        self.whole_transform_right = trans_m.dot(self.whole_transform_right)
+
+        # returns all needed data for further stitching of images shot with the
+        # same camerasetup
+        return (self.img_l_size, self.img_l_size, self.whole_transform_left,
+                self.whole_transform_right, self.pano_size)
+
+class BB_SelectionStitcher(BB_Stitcher):
+
+    def __call__(self, images, camIdxs=None, angles=(90,-90)):
+        img_l, img_l_ro, img_l_ro_mat, img_r, img_r_ro, img_r_ro_mat = self.rectify_n_rotate(
+            angles, camIdxs, images)
+
+        # Pick Points for Homography
+        comp = composer.Composer()
+        homo_l, homo_r = comp(img_l_ro, img_r_ro)
+        # calculate the overall homography including the previous rotation
+        self.whole_transform_left = homo_l.dot(img_l_ro_mat)
+        self.whole_transform_right = homo_r.dot(img_r_ro_mat)
+
+        # will align the 'real' panorama with display area
+        trans_m, self.pano_size = helpers.get_translation(
+            img_l.shape[:2], img_r.shape[:2],
+            self.whole_transform_left, self.whole_transform_right)
+        log.debug('new_size =\n{}'.format(self.pano_size))
+
+        # calculate the overall homography including the previous translation
+        self.whole_transform_left = trans_m.dot(self.whole_transform_left)
+        self.whole_transform_right = trans_m.dot(self.whole_transform_right)
+
+        # returns all needed data for further stitching of images shot with the
+        # same camerasetup
+        return (self.img_l_size, self.img_l_size, self.whole_transform_left,
+                self.whole_transform_right, self.pano_size)
