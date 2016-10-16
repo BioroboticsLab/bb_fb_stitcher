@@ -1,6 +1,5 @@
 import fb_stitcher.rectificator
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import logging.config
 import fb_stitcher.helpers as helpers

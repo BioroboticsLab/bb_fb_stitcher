@@ -25,8 +25,8 @@ def process_images(args):
     camIdx_r = helpers.get_CamIdx(args.right)
     assert camIdx_l in [0, 1, 2, 3] and camIdx_r in [0, 1, 2, 3]
 
-    img_l =cv2.imread(args.left, -1)
-    img_r =cv2.imread(args.right, -1)
+    img_l = cv2.imread(args.left, -1)
+    img_r = cv2.imread(args.right, -1)
 
     bb_stitcher_fb = core.BB_FeatureBasedStitcher(Transformation(args.transform))
     bb_stitcher_fb((img_l, img_r), (camIdx_l, camIdx_r), (args.left_angle, args.right_angle))

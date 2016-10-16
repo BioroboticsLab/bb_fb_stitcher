@@ -11,6 +11,7 @@ import numpy as np
 
 log = getLogger(__name__)
 
+
 class BB_Stitcher(object):
 
     def __init__(self):
@@ -219,9 +220,10 @@ class BB_FeatureBasedStitcher(BB_Stitcher):
         return (self.img_l_size, self.img_l_size, self.whole_transform_left,
                 self.whole_transform_right, self.pano_size)
 
+
 class BB_SelectionStitcher(BB_Stitcher):
 
-    def __call__(self, images, camIdxs=None, angles=(90,-90)):
+    def __call__(self, images, camIdxs=None, angles=(90, -90)):
         img_l, img_l_ro, img_l_ro_mat, img_r, img_r_ro, img_r_ro_mat = self.rectify_n_rotate(
             angles, camIdxs, images)
 

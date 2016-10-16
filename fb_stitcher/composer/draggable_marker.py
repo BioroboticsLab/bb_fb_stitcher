@@ -31,7 +31,8 @@ class DraggableMarker(object):
     def _set_annotation(self):
         """Set the annotation number of marker."""
         x, y = self.mark.get_xydata()[0]
-        self.text = self.mark.axes.text(x +20 , y+20, str(self.num), bbox=dict(facecolor='red', alpha=0.5))
+        self.text = self.mark.axes.text(x + 20, y + 20, str(self.num),
+                                        bbox=dict(facecolor='red', alpha=0.5))
 
     def connect(self):
         """Connect to all needed Events."""
@@ -168,6 +169,7 @@ class DraggableMarker(object):
         self.mark.figure.canvas.mpl_disconnect(self.c_id_motion)
         self.mark.figure.canvas.draw()
 
+
 class DraggableMarkerStack(object):
     def __init__(self):
         self.list = []
@@ -178,12 +180,12 @@ class DraggableMarkerStack(object):
     def append(self, dm):
         self.list.append(dm)
 
-    def pop(self, dm):
+    def pop(self):
         if len(self.list) >= 0:
             self.list.pop()
 
     def get_pts(self):
-        pts = np.zeros((1,len(self.list),2), np.float32)
+        pts = np.zeros((1, len(self.list), 2), np.float32)
         for i, dm in enumerate(self.list):
             pts[0][i] = dm.mark.get_xydata()[0]
         return pts
@@ -198,9 +200,6 @@ class DraggableMarkerStack(object):
         for i, dm in enumerate(selected):
             pts[0][i] = dm.mark.get_xydata()[0]
         return pts
-
-
-
 
 
 def dms_to_pts(dms_list):

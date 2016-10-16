@@ -1,9 +1,6 @@
 import fb_stitcher.stitcher
 import cv2
-import matplotlib.pyplot as plt
-import numpy as np
 import logging.config
-import fb_stitcher.helpers as helpers
 from fb_stitcher.stitcher import Transformation
 
 logging.config.fileConfig('logging_config.ini')

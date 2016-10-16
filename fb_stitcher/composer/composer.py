@@ -54,7 +54,7 @@ def argsort_pts(points):
     # calculate the barycentre / centre of gravity
     barycentre = points.sum(axis=0) / 4
 
-    # var for saving the points in realtion to the barycentre
+    # var for saving the points in relation to the barycentre
     bary_vectors = np.zeros((4, 2), np.float32)
 
     # var for saving the A point of the origin
@@ -66,7 +66,7 @@ def argsort_pts(points):
         # determine the distance to the origin
         cur_dist_origin = np.linalg.norm(point)
 
-        # save the A point of the orgin
+        # save the A point of the origin
         if A is None or cur_dist_origin < min_dist:
             min_dist = cur_dist_origin
             A = i
@@ -145,7 +145,7 @@ def find_rect(quadri_left, quadri_right):
     rect_dest[5] = 0, vert
     return rect_dest, hor_l
 
-def find_homographys(quadri_left, quadri_right, rect_dest):
+def find_homographies(quadri_left, quadri_right, rect_dest):
     """Determine the homography between (quadri_left, quadri_right) & rect_dest.
 
     The function will map the the quadrilaterals quadri_left and quadri_right
@@ -166,7 +166,7 @@ def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
     that they are not aligned with the displayed area anymore. So they need to
     be translated.
     """
-    # get origina width and height of images
+    # get original width and height of images
     w_l, h_l = shape_l
     w_r, h_r = shape_r
     log.debug('(h_l,w_l) = {}'.format(shape_l))
