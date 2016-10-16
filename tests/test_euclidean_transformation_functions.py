@@ -1,7 +1,7 @@
 import fb_stitcher.helpers as helpers
 import logging.config
 import numpy as np
-print(helpers.cart_2_pol([1,1]))
+print(helpers.cart_2_pol([1, 1]))
 logging.config.fileConfig('logging_config.ini')
 
 ptl_center = np.array([4, 1])

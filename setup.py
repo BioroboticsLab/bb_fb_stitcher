@@ -6,7 +6,8 @@ dep_links = []
 setup(
     name='bb_fb_stitcher',
     version='0.0.0.dev1',
-    description='Stitch images from different cam positions, with an afffine transformation',
+    description='Stitch images from different cam positions,'
+                'with an affine transformation',
     long_description='',
     entry_points={
         'console_scripts': [

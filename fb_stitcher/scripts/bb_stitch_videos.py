@@ -8,8 +8,7 @@ def process_videos(args):
     right_cap = cv2.VideoCapture(args.right)
     stitcher = core.BB_FeatureBasedStitcher()
     stitcher.load_data(args.data)
-    result_writer = cv2.VideoWriter('result2.avi', cv2.VideoWriter_fourcc(*'XVID'), 3, (600,400))
-
+    result_writer = cv2.VideoWriter('result2.avi', cv2.VideoWriter_fourcc(*'XVID'), 3, (600, 400))
 
     try:
         while 1:
@@ -27,6 +26,7 @@ def process_videos(args):
 
     except KeyboardInterrupt:
         pass
+
 
 def main():
     parser = argparse.ArgumentParser(

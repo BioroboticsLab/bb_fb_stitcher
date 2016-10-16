@@ -49,7 +49,7 @@ class Rotator(object):
         # get the rectangle which would surround the rotated image
         __, __, w, h = cv2.boundingRect(np.array(corners_rotated))
 
-        # boundigRect is 1px bigger so remove it
+        # boundingRect is 1px bigger so remove it
         self.size_new = (w-1, h-1)
         log.debug('size_new = {}'.format(self.size_new))
 

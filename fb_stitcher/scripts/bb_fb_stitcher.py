@@ -6,6 +6,7 @@ import cv2
 from argparse import RawTextHelpFormatter
 import os
 
+
 def process_images(args):
     # checks if filenames are valid
     assert helpers.check_filename(args.left) and helpers.check_filename(args.right)
@@ -20,7 +21,6 @@ def process_images(args):
     else:
         data_path = args.data
 
-
     camIdx_l = helpers.get_CamIdx(args.left)
     camIdx_r = helpers.get_CamIdx(args.right)
     assert camIdx_l in [0, 1, 2, 3] and camIdx_r in [0, 1, 2, 3]
@@ -29,7 +29,7 @@ def process_images(args):
     img_r =cv2.imread(args.right, -1)
 
     bb_stitcher_fb = core.BB_FeatureBasedStitcher(Transformation(args.transform))
-    bb_stitcher_fb((img_l, img_r),(camIdx_l, camIdx_r),(args.left_angle, args.right_angle))
+    bb_stitcher_fb((img_l, img_r), (camIdx_l, camIdx_r), (args.left_angle, args.right_angle))
 
     bb_stitcher_fb.save_data(data_path)
     print('Saved stitching params to: {} '.format(data_path))
@@ -46,9 +46,9 @@ def process_images(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        prog = 'BeesBook feature based Stitcher.',
-        description = 'This will stitch two images and return the needed data '
-                      ' for reproducing the stitching (,also with points).',
+        prog='BeesBook feature based Stitcher.',
+        description='This will stitch two images and return the needed data '
+                    ' for reproducing the stitching (,also with points).',
         formatter_class=RawTextHelpFormatter
     )
     parser.add_argument('left', help='Path of the left image.', type=str)
@@ -60,7 +60,7 @@ def main():
                                           ' 1 - EUCLIDEAN\n'
                                           '(2 - SIMILARITY)\n'
                                           ' 3 - AFFINE\n'
-                                          ' 4 - PROJECTIVE', type=int, choices=[0,1,3,4])
+                                          ' 4 - PROJECTIVE', type=int, choices=[0, 1, 3, 4])
     parser.add_argument('data', help='Output directory/path of the stitching data.', type=str)
     parser.add_argument('--pano', '-p', nargs=1, help='Path of the panorama.')
 

@@ -95,7 +95,7 @@ class BB_FeatureBasedStitcher(object):
 
     @staticmethod
     def transform_image(img, homography, pano_size):
-        "Transform image by homography."
+        """"Transform image by homography."""
         img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
         re = rect.Rectificator()
         img_rect = re.rectify_images(img)
@@ -103,7 +103,7 @@ class BB_FeatureBasedStitcher(object):
         return trans_img
 
     def transform_left_image(self, img=None):
-        "Transform left image by cached homography."
+        """"Transform left image by cached homography."""
         if img is None:
             img = self.cached_img_l
         trans_img = BB_FeatureBasedStitcher.transform_image(
@@ -111,7 +111,7 @@ class BB_FeatureBasedStitcher(object):
         return trans_img
 
     def transform_right_image(self, img=None):
-        "Transform right image by cached homography."
+        """Transform right image by cached homography."""
         if img is None:
             img = self.cached_img_r
         trans_img = BB_FeatureBasedStitcher.transform_image(
@@ -126,6 +126,7 @@ class BB_FeatureBasedStitcher(object):
         trans_img_r = self.transform_right_image(img_r)
         return BB_FeatureBasedStitcher.blend_transparent(trans_img_l, trans_img_r)
 
+    @staticmethod
     def blend_transparent(fg_img=None, bg_img=None, blur=True):
         # Split out the transparency mask from the colour info
         overlay_img = fg_img[:, :, :3]  # Grab the BRG planes
@@ -199,7 +200,7 @@ class BB_FeatureBasedStitcher(object):
             self.camIdx_left = data['camIdx_left']
             self.camIdx_right = data['camIdx_right']
 
-            # savez doen't save the tuple info
+            # np.savez doesn't save the tuple info
             self.img_l_size = tuple(data['img_l_size'])
             self.img_r_size = tuple(data['img_r_size'])
             self.whole_transform_left = data['whole_transform_left']

@@ -39,8 +39,11 @@ class Rectificator(object):
         return rect_imgs
 
     def rectify_points(self, points, size):
-        """Maps points from distorted image to its pos in an undistored img. """
+        """Maps points from distorted image to its pos in an undistorted img. """
         log.info(size)
-        self.cached_new_cam_mat, __ = cv2.getOptimalNewCameraMatrix(self.intr_m, self.dist_c, size, 1, size, 0)
+        self.cached_new_cam_mat, __ = cv2.getOptimalNewCameraMatrix(self.intr_m,
+                                                                    self.dist_c,
+                                                                    size, 1,
+                                                                    size, 0)
         log.debug('new_camera_mat = \n{}'.format(self.cached_new_cam_mat))
         return cv2.undistortPoints(points, self.intr_m, self.dist_c, None, self.cached_new_cam_mat)

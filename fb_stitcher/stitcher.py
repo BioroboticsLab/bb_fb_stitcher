@@ -20,6 +20,7 @@ class Transformation(Enum):
     AFFINE = 3
     PROJECTIVE = 4
 
+
 class FeatureBasedStitcher(object):
     """Class to execute a feature based Stitching."""
 
@@ -38,7 +39,7 @@ class FeatureBasedStitcher(object):
         self.cached_right_img = None
 
     def __call__(self, images, drawMatches=False):
-        """Calculate the homographie to map right image to the left one."""
+        """Calculate the homography to map right image to the left one."""
 
         # get the images
         (self.cached_left_img, self.cached_right_img) = images
@@ -46,7 +47,8 @@ class FeatureBasedStitcher(object):
         if self.cached_homo is None:
 
             # calculates the mask which will mark the feature searching area.
-            left_mask, right_mask = self.calc_feature_masks(self.cached_left_img.shape[:2], self.cached_right_img.shape[:2])
+            left_mask, right_mask = self.calc_feature_masks(self.cached_left_img.shape[:2],
+                                                            self.cached_right_img.shape[:2])
 
             # Searching for keypoints and descriptors in the images
             log.info('Start searching for features.')
@@ -58,17 +60,21 @@ class FeatureBasedStitcher(object):
             # helpers.display(right_features, time=500)
             log.debug('Features found: #left_kps = {} | #right_kps = {}'.format(
                 len(left_kps), len(right_kps)))
-            assert(len(left_kps)>0 and len(right_kps)>0)
+            assert(len(left_kps) > 0 and len(right_kps) > 0)
 
             # select planar transformation and search for the right homography
             if self.transformation == Transformation.PROJECTIVE:
-                (self.cached_homo, mask_good, good_matches) = self.transform_projective(left_kps, right_kps, left_ds, right_ds)
+                (self.cached_homo, mask_good, good_matches) = self.transform_projective(
+                    left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.AFFINE:
-                (self.cached_homo, mask_good, good_matches) = self.transform_affine(left_kps, right_kps, left_ds, right_ds)
+                (self.cached_homo, mask_good, good_matches) = self.transform_affine(
+                    left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.EUCLIDEAN:
-                (self.cached_homo, mask_good, good_matches) = self.transform_euclidean(left_kps, right_kps, left_ds, right_ds)
+                (self.cached_homo, mask_good, good_matches) = self.transform_euclidean(
+                    left_kps, right_kps, left_ds, right_ds)
             elif self.transformation == Transformation.TRANSLATION:
-                (self.cached_homo, mask_good, good_matches) = self.transform_translation(left_kps, right_kps, left_ds, right_ds)
+                (self.cached_homo, mask_good, good_matches) = self.transform_translation(
+                    left_kps, right_kps, left_ds, right_ds)
             else:
                 print('Not implemented yet.')
             if self.cached_homo is None:
@@ -82,7 +88,7 @@ class FeatureBasedStitcher(object):
             matchesMask = mask_good.ravel().tolist()
             result_matches = cv2.drawMatches(
                 self.cached_left_img, left_kps, self.cached_right_img,
-                right_kps, good_matches, matchesMask=None, **draw_params)
+                right_kps, good_matches, matchesMask=matchesMask, **draw_params)
 
             return self.cached_homo, result_matches
 
@@ -210,6 +216,7 @@ class FeatureBasedStitcher(object):
             return translation, mask_top, top_matches
         return None
 
+    @DeprecationWarning
     def warp_images(self, left_img=None, right_img=None):
         if left_img is None:
             left_img = self.cached_left_img
@@ -221,8 +228,6 @@ class FeatureBasedStitcher(object):
         result[0:left_img.shape[0], 0:left_img.shape[1]] = left_img
         return result
 
-
-    # deprecated
     @DeprecationWarning
     def get_best_3_matches(left_kps, right_kps, left_ds, right_ds):
         bf = cv2.BFMatcher()
