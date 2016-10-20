@@ -217,7 +217,7 @@ class BB_FeatureBasedStitcher(BB_Stitcher):
 
         # returns all needed data for further stitching of images shot with the
         # same camerasetup
-        return (self.img_l_size, self.img_l_size, self.whole_transform_left,
+        return (self.img_l_size, self.img_r_size, self.whole_transform_left,
                 self.whole_transform_right, self.pano_size)
 
 
