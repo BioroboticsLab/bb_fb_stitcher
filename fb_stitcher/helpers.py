@@ -213,7 +213,7 @@ def overlay_images(foreground_image, background_image):
 def check_filename(filename):
     """Check if the filename (with path) is a valid background image."""
     filename = os.path.basename(filename)
-    correct_pattern = re.compile(config.FILE_NAMES)
+    correct_pattern = re.compile(config.VIDEO_NAMES)
     return None is not re.match(correct_pattern, filename)
 
 

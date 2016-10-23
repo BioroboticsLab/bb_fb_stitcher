@@ -67,8 +67,6 @@ class Rotator(object):
 
     def rotate_image(self, image, angle, ret=False):
         """Rotate image by given angle."""
-        not_cached = self.affine_mat is None or self.size_new is None
-        changed_val = self.shape != image.shape[:2] or self.angle != angle
 
         # Checks if previous an image with same properties has been rotated.
         # if not_cached or changed_val:

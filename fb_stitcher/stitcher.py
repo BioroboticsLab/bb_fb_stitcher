@@ -16,7 +16,7 @@ class Transformation(Enum):
     """Enumeration to define the possible transformations."""
     TRANSLATION = 0
     EUCLIDEAN = 1
-    SIMILARITY = 2
+    # SIMILARITY = 2
     AFFINE = 3
     PROJECTIVE = 4
 
