@@ -99,7 +99,7 @@ class BB_Stitcher(object):
         return BB_Stitcher.blend_transparent(trans_img_l, trans_img_r)
 
     @staticmethod
-    def blend_transparent(fg_img=None, bg_img=None, blur=True):
+    def blend_transparent(fg_img=None, bg_img=None, blur=False):
         # Split out the transparency mask from the colour info
         overlay_img = fg_img[:, :, :3]  # Grab the BRG planes
         overlay_mask = fg_img[:, :, 3:]  # And the alpha plane
