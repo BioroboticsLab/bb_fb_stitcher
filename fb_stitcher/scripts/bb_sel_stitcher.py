@@ -9,8 +9,8 @@ import os
 def process_images(args):
     # checks if filenames are valid
 
-    name_l = os.path.basename(args.left)
-    name_r = os.path.basename(args.right)
+    name_l = os.path.splitext(os.path.basename(args.left))[0]
+    name_r = os.path.splitext(os.path.basename(args.right))[0]
     out_basename = ''.join(['S_', name_l, '_ST_', name_r])
 
     if os.path.isdir(args.data):
