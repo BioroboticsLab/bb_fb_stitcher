@@ -96,7 +96,7 @@ class BB_Stitcher(object):
             img_r = self.cached_img_r
         trans_img_l = self.transform_left_image(img_l)
         trans_img_r = self.transform_right_image(img_r)
-        return BB_FeatureBasedStitcher.blend_transparent(trans_img_l, trans_img_r)
+        return BB_Stitcher.blend_transparent(trans_img_l, trans_img_r)
 
     @staticmethod
     def blend_transparent(fg_img=None, bg_img=None, blur=True):
