@@ -16,7 +16,7 @@ class Transformation(Enum):
     """Enumeration to define the possible transformations."""
     TRANSLATION = 0
     EUCLIDEAN = 1
-    # SIMILARITY = 2
+    SIMILARITY = 2
     AFFINE = 3
     PROJECTIVE = 4
 
@@ -63,20 +63,26 @@ class FeatureBasedStitcher(object):
             assert(len(left_kps) > 0 and len(right_kps) > 0)
 
             # select planar transformation and search for the right homography
-            if self.transformation == Transformation.PROJECTIVE:
-                (self.cached_homo, mask_good, good_matches) = self.transform_projective(
-                    left_kps, right_kps, left_ds, right_ds)
-            elif self.transformation == Transformation.AFFINE:
-                (self.cached_homo, mask_good, good_matches) = self.transform_affine(
-                    left_kps, right_kps, left_ds, right_ds)
-            elif self.transformation == Transformation.EUCLIDEAN:
-                (self.cached_homo, mask_good, good_matches) = self.transform_euclidean(
-                    left_kps, right_kps, left_ds, right_ds)
-            elif self.transformation == Transformation.TRANSLATION:
-                (self.cached_homo, mask_good, good_matches) = self.transform_translation(
-                    left_kps, right_kps, left_ds, right_ds)
-            else:
-                print('Not implemented yet.')
+            try:
+                if self.transformation == Transformation.PROJECTIVE:
+                    (self.cached_homo, mask_good, good_matches) = self.transform_projective(
+                        left_kps, right_kps, left_ds, right_ds)
+                elif self.transformation == Transformation.AFFINE:
+                    (self.cached_homo, mask_good, good_matches) = self.transform_affine(
+                        left_kps, right_kps, left_ds, right_ds)
+                elif self.transformation == Transformation.SIMILARITY:
+                    (self.cached_homo, mask_good, good_matches) = self.transform_similarity(
+                        left_kps, right_kps, left_ds, right_ds)
+                elif self.transformation == Transformation.EUCLIDEAN:
+                    (self.cached_homo, mask_good, good_matches) = self.transform_euclidean(
+                        left_kps, right_kps, left_ds, right_ds)
+                elif self.transformation == Transformation.TRANSLATION:
+                    (self.cached_homo, mask_good, good_matches) = self.transform_translation(
+                        left_kps, right_kps, left_ds, right_ds)
+                else:
+                    print('Not implemented yet.')
+            except TypeError as t:
+                (self.cached_homo, mask_good, good_matches) = None, None, None
             if self.cached_homo is None:
                 log.warning('No Transformation matrix found.')
                 return None
@@ -144,8 +150,52 @@ class FeatureBasedStitcher(object):
             return homo, mask_good, good_matches
         return None
 
+
+
     @staticmethod
     def transform_affine(left_kps, right_kps, left_ds, right_ds):
+        """Determine affine transform which fits best to map right kps to left kps."""
+        bf = cv2.BFMatcher()
+        log.info('Start matching Features.')
+        raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
+        log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
+        left_pts, right_pts, good_matches = helpers.get_points_n_matches(
+            left_kps, right_kps, raw_matches)
+
+        if len(left_pts) > 2:
+            log.info('Start finding affine transformation matrix.')
+            affine = cv2.estimateRigidTransform(left_pts, right_pts, True)
+            if affine is None:
+                return None
+            affine = cv2.invertAffineTransform(affine)
+            affine = np.vstack([affine, [0, 0, 1]])
+            mask_top = None
+            return affine, mask_top, good_matches
+        return None
+
+    @staticmethod
+    def transform_similarity(left_kps, right_kps, left_ds, right_ds):
+        """Determine affine transform which fits best to map right kps to left kps."""
+        bf = cv2.BFMatcher()
+        log.info('Start matching Features.')
+        raw_matches = bf.knnMatch(left_ds, right_ds, k=2)
+        log.debug('Matches found: #raw_matches = {}'.format(len(raw_matches)))
+        left_pts, right_pts, good_matches = helpers.get_points_n_matches(
+            left_kps, right_kps, raw_matches)
+
+        if len(left_pts) > 2:
+            log.info('Start finding affine transformation matrix.')
+            affine = cv2.estimateRigidTransform(left_pts, right_pts, False)
+            if affine is None:
+                return None
+            affine = cv2.invertAffineTransform(affine)
+            affine = np.vstack([affine, [0, 0, 1]])
+            mask_top = None
+            return affine, mask_top, good_matches
+        return None
+
+    @DeprecationWarning
+    def old_transform_affine(left_kps, right_kps, left_ds, right_ds):
         """Determine affine transform which fits best to map right kps to left kps."""
         (homo, mask_good,
          good_matches) = FeatureBasedStitcher.transform_projective(left_kps,
@@ -166,6 +216,8 @@ class FeatureBasedStitcher(object):
             affine = np.vstack([affine, [0, 0, 1]])
             return affine, mask_top, top_matches
         return None
+
+
 
     @staticmethod
     def transform_euclidean(left_kps, right_kps, left_ds, right_ds):

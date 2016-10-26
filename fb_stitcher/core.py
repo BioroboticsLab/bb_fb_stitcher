@@ -68,7 +68,9 @@ class BB_Stitcher(object):
     @staticmethod
     def transform_image(img, homography, pano_size):
         """"Transform image by homography."""
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+        if homography is None:
+            return None
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGRA)
         re = rect.Rectificator()
         img_rect = re.rectify_images(img)
         trans_img = cv2.warpPerspective(img_rect, homography, pano_size)
@@ -101,6 +103,9 @@ class BB_Stitcher(object):
     @staticmethod
     def blend_transparent(fg_img=None, bg_img=None, blur=False):
         # Split out the transparency mask from the colour info
+
+        if fg_img is None or bg_img is None:
+            return None
         overlay_img = fg_img[:, :, :3]  # Grab the BRG planes
         overlay_mask = fg_img[:, :, 3:]  # And the alpha plane
 
@@ -200,6 +205,8 @@ class BB_FeatureBasedStitcher(BB_Stitcher):
         st = stitcher.FeatureBasedStitcher(
             overlap=400, border=500, transformation=self.transform)
         homo = st((img_l_ro, img_r_ro))
+        if homo is None:
+            return None
 
         # calculate the overall homography including the previous rotation
         self.whole_transform_left = img_l_ro_mat
