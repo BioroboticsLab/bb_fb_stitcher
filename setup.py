@@ -1,6 +1,6 @@
 from setuptools import setup
 
-install_reqs = ['numpy', 'matplotlib']
+install_reqs = ['numpy', 'matplotlib', 'git+https://github.com/scikit-image/scikit-image.git']
 dep_links = []
 
 setup(

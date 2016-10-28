@@ -58,11 +58,10 @@ def main():
     parser.add_argument('left_angle', help='Rotation angle of the left image', type=int)
     parser.add_argument('right_angle', help='Rotation angle of the right image', type=int)
     parser.add_argument('transform', help='Type of Transformation: \n'
-                                          ' 0 - Translation\n'
-                                          ' 1 - EUCLIDEAN\n'
-                                          '(2 - SIMILARITY)\n'
-                                          ' 3 - AFFINE\n'
-                                          ' 4 - PROJECTIVE', type=int, choices=[0, 1, 2, 3, 4])
+                                          ' 0 - EUCLIDEAN\n'
+                                          ' 1 - SIMILARITY\n'
+                                          ' 2 - AFFINE\n'
+                                          ' 3 - PROJECTIVE', type=int, choices=[0, 1, 2, 3])
     parser.add_argument('data', help='Output directory/path of the stitching data.', type=str)
     parser.add_argument('--pano', '-p', nargs=1, help='Path of the panorama.')
 
