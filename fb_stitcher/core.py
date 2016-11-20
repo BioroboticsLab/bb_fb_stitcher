@@ -1,10 +1,10 @@
 """Main Class of the feature based stitcher for the Beesbook Project."""
 import cv2
+from fb_stitcher.composer import composer
 import fb_stitcher.helpers as helpers
 import fb_stitcher.rectificator as rect
 import fb_stitcher.rotator as rot
 import fb_stitcher.stitcher as stitcher
-from fb_stitcher.composer import composer
 from fb_stitcher.stitcher import Transformation
 from logging import getLogger
 import numpy as np
@@ -185,6 +185,7 @@ class BB_Stitcher(object):
             self.pano_size = tuple(data['pano_size'])
         log.info('Stitcher arguments loaded from {}'.format(path))
 
+
 class BB_FeatureBasedStitcher(BB_Stitcher):
     """Stitching the images of the BeesBook Project."""
 
@@ -193,7 +194,6 @@ class BB_FeatureBasedStitcher(BB_Stitcher):
 
         super().__init__()
         self.transform = transform
-
 
     def __call__(self, images, camIdxs=None, angles=(90, -90)):
         """Calculate Stitching data for further stitching."""

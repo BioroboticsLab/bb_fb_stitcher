@@ -1,5 +1,6 @@
+from fb_stitcher.composer.draggable_marker import DraggableMarker
+from fb_stitcher.composer.draggable_marker import DraggableMarkerStack
 import matplotlib.pyplot as plt
-from fb_stitcher.composer.draggable_marker import DraggableMarker, DraggableMarkerStack
 
 
 class PointPicker(object):
@@ -48,7 +49,7 @@ class PointPicker(object):
         dms_left = DraggableMarkerStack()
         dms_right = DraggableMarkerStack()
 
-        # TODO c_id
+        # TODO(c_id)
         c_id = fig.canvas.mpl_connect('button_press_event', _on_click)
         plt.show()
 

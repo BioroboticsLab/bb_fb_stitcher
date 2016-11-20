@@ -1,5 +1,5 @@
-import fb_stitcher.config as config
 import cv2
+import fb_stitcher.config as config
 from logging import getLogger
 
 log = getLogger(__name__)
@@ -16,7 +16,7 @@ class Rectificator(object):
         self.cached_dim = None
 
     def rectify_images(self, *images):
-        """Remove Lens distortion from images."""
+        """Remove Lens distortion from images"""
         log.info('Start rectification of {} images.'.format(len(images)))
         if not images:
             log.warning('List of images for rectification is empty.')

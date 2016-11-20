@@ -16,7 +16,7 @@ INTR_M = np.array([
 RDIST_M = np.array([-0.092357757076643, 0.362707179300789, -0.442500973922752])
 TDIST_M = np.array([-0.012841576857909, 0.001563484164365])
 
-# TODO Check Distortion_Coeff
+# TODO(Distortion_Coeff) Check Distortion_Coeff
 DIST_C = np.array(
     [RDIST_M[0], RDIST_M[1], TDIST_M[0], TDIST_M[1], RDIST_M[2]])
 

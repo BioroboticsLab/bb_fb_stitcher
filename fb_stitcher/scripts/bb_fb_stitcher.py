@@ -1,9 +1,9 @@
-import fb_stitcher.core as core
-from fb_stitcher.stitcher import Transformation
 import argparse
-import fb_stitcher.helpers as helpers
-import cv2
 from argparse import RawTextHelpFormatter
+import cv2
+import fb_stitcher.core as core
+import fb_stitcher.helpers as helpers
+from fb_stitcher.stitcher import Transformation
 import os
 
 
@@ -29,7 +29,8 @@ def process_images(args):
     img_r = cv2.imread(args.right, 0)
 
     bb_stitcher_fb = core.BB_FeatureBasedStitcher(Transformation(args.transform))
-    result = bb_stitcher_fb((img_l, img_r), (camIdx_l, camIdx_r), (args.left_angle, args.right_angle))
+    result = bb_stitcher_fb(
+        (img_l, img_r), (camIdx_l, camIdx_r), (args.left_angle, args.right_angle))
     if result is None:
         print("No homography found.")
     else:

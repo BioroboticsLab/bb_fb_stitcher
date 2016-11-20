@@ -1,8 +1,8 @@
 import cv2
-import fb_stitcher.helpers as helpers
-import numpy as np
-from logging import getLogger
 from enum import Enum
+import fb_stitcher.helpers as helpers
+from logging import getLogger
+import numpy as np
 from skimage.measure import ransac
 from skimage.transform import EuclideanTransform
 
@@ -100,14 +100,14 @@ class FeatureBasedStitcher(object):
 
     def calc_feature_masks(self, left_shape, right_shape):
         """Calculate the mask, which define area for feature detection."""
-        left_mask = np.ones(left_shape, np.uint8)*255
-        right_mask = np.ones(right_shape, np.uint8)*255
+        left_mask = np.ones(left_shape, np.uint8) * 255
+        right_mask = np.ones(right_shape, np.uint8) * 255
         if self.overlap is not None:
             left_mask[:, :left_shape[1] - self.overlap] = 0
             right_mask[:, self.overlap:] = 0
         if self.border is not None:
             left_mask[:self.border, :] = 0
-            left_mask[left_shape[0]-self.border:, :] = 0
+            left_mask[left_shape[0] - self.border:, :] = 0
             right_mask[:self.border, :] = 0
             right_mask[right_shape[0] - self.border:, :] = 0
         return left_mask, right_mask
@@ -117,7 +117,7 @@ class FeatureBasedStitcher(object):
         """Search for Features in <img>."""
         # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # TODO opencv versions check
+        # TODO(Version Check) opencv versions check
 
         surf = cv2.xfeatures2d.SURF_create(hessianThreshold=100, nOctaves=4)
         surf.setUpright(True)
@@ -147,8 +147,6 @@ class FeatureBasedStitcher(object):
                 right_pts, left_pts, cv2.RANSAC, 2.0)
             return homo, mask_good, good_matches
         return None
-
-
 
     @staticmethod
     def transform_affine(left_kps, right_kps, left_ds, right_ds):
@@ -192,7 +190,6 @@ class FeatureBasedStitcher(object):
             return affine, mask_top, good_matches
         return None
 
-
     @staticmethod
     def transform_euclidean(left_kps, right_kps, left_ds, right_ds):
         """Determine projective transform which fits best to map right kps to left kps."""
@@ -205,12 +202,13 @@ class FeatureBasedStitcher(object):
         log.debug('# Filtered Features = {}'.format(len(good_matches)))
         if len(left_pts) > 3:
             log.info('Start finding homography.')
-            left_pts = left_pts.reshape((len(left_pts),2))
-            right_pts = right_pts.reshape((len(right_pts),2))
+            left_pts = left_pts.reshape((len(left_pts), 2))
+            right_pts = right_pts.reshape((len(right_pts), 2))
             model = EuclideanTransform()
             model.estimate(right_pts, left_pts)
-            model_robust, inliers = ransac((right_pts, left_pts), EuclideanTransform, min_samples=50,
-                               residual_threshold=10, max_trials=3000)
+            model_robust, inliers = ransac(
+                (right_pts, left_pts), EuclideanTransform, min_samples=50,
+                residual_threshold=10, max_trials=3000)
             homo = model_robust.params
             mask_good = None
             return homo, mask_good, good_matches
@@ -272,5 +270,3 @@ class FeatureBasedStitcher(object):
             mask_better = np.ones((3, 1))
             return affine, mask_better, better_matches
         return None
-
-

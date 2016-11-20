@@ -1,6 +1,6 @@
+import cv2
 from logging import getLogger
 import numpy as np
-import cv2
 
 log = getLogger(__name__)
 
@@ -50,7 +50,7 @@ class Rotator(object):
         __, __, w, h = cv2.boundingRect(np.array(corners_rotated))
 
         # boundingRect is 1px bigger so remove it
-        self.size_new = (w-1, h-1)
+        self.size_new = (w - 1, h - 1)
         log.debug('size_new = {}'.format(self.size_new))
 
         # matrix to center the rotated image

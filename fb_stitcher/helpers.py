@@ -1,10 +1,10 @@
-import numpy as np
-from logging import getLogger
 import cv2
 import fb_stitcher.config as config
+from logging import getLogger
 import math
-import re
+import numpy as np
 import os
+import re
 
 log = getLogger(__name__)
 
@@ -43,7 +43,7 @@ def get_points_n_matches(kps1, kps2, matches, ratio=1, max_shift=config.SHIFT):
             m = m[0]
 
             # Checks the distance of the points in the y-direction.
-            dist = abs(np.array(kps1[m.queryIdx].pt)-np.array(kps2[m.trainIdx].pt))
+            dist = abs(np.array(kps1[m.queryIdx].pt) - np.array(kps2[m.trainIdx].pt))
             if dist[1] < max_shift:
                 good_matches.append(m)
 
@@ -116,7 +116,7 @@ def subtract_foreground(cap, show=False):
 
 def cart_2_pol(pt):
     """Convert cartesian coordinate to polar coordinate."""
-    rho = np.sqrt(pt[0]**2+pt[1]**2)
+    rho = np.sqrt(pt[0] ** 2 + pt[1] ** 2)
     phi = math.degrees(np.arctan2(pt[1], pt[0]))
     return rho, phi
 
@@ -158,6 +158,7 @@ def get_euclid_transform_mat(center_l, center_r, pt_l, pt_r):
 
 def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
     """Determine the translation matrix of two transformed images.
+
     When two images have been transformed by an homography, it's possible
     that they are not aligned with the displayed area anymore. So they need to
     be translated and the display area must be increased.

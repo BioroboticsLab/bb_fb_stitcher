@@ -1,7 +1,7 @@
-import fb_stitcher.helpers as helpers
 import argparse
-import os
 import cv2
+import fb_stitcher.helpers as helpers
+import os
 
 
 def process_videos(args):
