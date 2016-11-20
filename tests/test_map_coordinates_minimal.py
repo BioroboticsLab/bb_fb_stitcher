@@ -1,5 +1,5 @@
-import numpy as np
 import fb_stitcher.core as core
+import numpy as np
 
 camIdx = 0
 

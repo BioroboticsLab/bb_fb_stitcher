@@ -1,5 +1,5 @@
-import fb_stitcher.composer.composer as composer
 import cv2
+import fb_stitcher.composer.composer as composer
 
 import logging.config
 

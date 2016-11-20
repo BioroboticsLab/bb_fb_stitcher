@@ -1,7 +1,7 @@
-import fb_stitcher.stitcher
 import cv2
-import logging.config
+import fb_stitcher.stitcher
 from fb_stitcher.stitcher import Transformation
+import logging.config
 
 logging.config.fileConfig('logging_config.ini')
 

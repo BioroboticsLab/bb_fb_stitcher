@@ -1,8 +1,8 @@
-import fb_stitcher.rectificator
 import cv2
-import numpy as np
-import logging.config
 import fb_stitcher.helpers as helpers
+import fb_stitcher.rectificator
+import logging.config
+import numpy as np
 
 logging.config.fileConfig('logging_config.ini')
 
@@ -33,7 +33,7 @@ imgl, imgr = rect.rectify_images(img_l_m, img_r_m)
 helpers.display(imgl)
 helpers.display(imgr)
 
-size_left = (img_l.shape[1],img_l.shape[0])
+size_left = (img_l.shape[1], img_l.shape[0])
 size_right = (img_r.shape[1], img_r.shape[0])
 pts_left_rect = rect.rectify_points(pts_left_org, size_left)
 pts_right_rect = rect.rectify_points(pts_right_org, size_right)

@@ -1,7 +1,7 @@
-import fb_stitcher.helpers as helpers
-from os.path import basename
 import cv2
+import fb_stitcher.helpers as helpers
 import os
+from os.path import basename
 
 left_video = ('data/foreground_subtractor/Input/'
               'Cam_0_20140918120038_045539_TO_Cam_0_20140918120622_267825.mkv')
