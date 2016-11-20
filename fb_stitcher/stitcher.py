@@ -119,7 +119,7 @@ class FeatureBasedStitcher(object):
 
         # TODO opencv versions check
 
-        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=2, nOctaves=4)
+        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=100, nOctaves=4)
         surf.setUpright(True)
         surf.setExtended(128)
 
@@ -209,8 +209,8 @@ class FeatureBasedStitcher(object):
             right_pts = right_pts.reshape((len(right_pts),2))
             model = EuclideanTransform()
             model.estimate(right_pts, left_pts)
-            model_robust, inliers = ransac((right_pts, left_pts), EuclideanTransform, min_samples=3,
-                               residual_threshold=15, max_trials=2000)
+            model_robust, inliers = ransac((right_pts, left_pts), EuclideanTransform, min_samples=50,
+                               residual_threshold=10, max_trials=3000)
             homo = model_robust.params
             mask_good = None
             return homo, mask_good, good_matches
