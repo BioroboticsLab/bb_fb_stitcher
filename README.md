@@ -3,7 +3,6 @@
 ## Requirements
 * [OpenCV3](https://github.com/opencv/opencv)
 * [opencv_contrib](https://github.com/opencv/opencv_contrib) (only required for step 1)
-* [FFmpeg](https://trac.ffmpeg.org/wiki/CompilationGuide) with H.265/HEVC (only required for step 1)
 
 [Good Instruction](http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/) for installing opencv with opencv_contrib
 
