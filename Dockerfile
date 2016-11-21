@@ -29,7 +29,8 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     python3 get-pip.py
 
 RUN pip3 install \
-    numpy
+    numpy \
+    git+https://github.com/scikit-image/scikit-image.git
 
 RUN cd ~ && \
     git clone https://github.com/Itseez/opencv.git && \
@@ -57,5 +58,5 @@ RUN cd ~/opencv && \
 
 RUN pip3 install \
     scipy \
-matplotlib \
-git+https://github.com/BioroboticsLab/bb_fb_stitcher.git \
+    matplotlib \
+    git+https://github.com/BioroboticsLab/bb_fb_stitcher.git \
