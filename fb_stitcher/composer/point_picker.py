@@ -42,8 +42,8 @@ class PointPicker(object):
         plt.setp(ax_right.get_yticklabels(), visible=False)
 
         #  display images
-        ax_left.imshow(self.img_l)
-        ax_right.imshow(self.right_img)
+        ax_left.imshow(self.img_l, cmap='Greys_r')
+        ax_right.imshow(self.right_img, cmap='Greys_r')
 
         # Initialize list for storing the DraggableMarkers
         dms_left = DraggableMarkerStack()
