@@ -25,7 +25,6 @@ def process_images(args):
 
     img_l = cv2.imread(args.left, 0)
     img_r = cv2.imread(args.right, 0)
-    print(img_l.shape)
 
     bb_sel_stitcher = core.BB_SelectionStitcher()
     bb_sel_stitcher((img_l, img_r), (camIdx_l, camIdx_r), (args.left_angle, args.right_angle))

@@ -1,3 +1,4 @@
+import cv2
 from fb_stitcher.composer.draggable_marker import DraggableMarker
 from fb_stitcher.composer.draggable_marker import DraggableMarkerStack
 import matplotlib.pyplot as plt
@@ -6,9 +7,9 @@ import matplotlib.pyplot as plt
 class PointPicker(object):
     """GUI for picking points."""
 
-    def __init__(self, img_l, right_img):
-        self.img_l = img_l
-        self.right_img = right_img
+    def __init__(self, img_l, img_r):
+        self.img_l = cv2.cvtColor(img_l, cv2.COLOR_GRAY2BGRA)
+        self.img_r = cv2.cvtColor(img_r, cv2.COLOR_GRAY2BGRA)
         self.count_dms_left = 0
         self.count_dms_right = 0
 
@@ -33,7 +34,7 @@ class PointPicker(object):
                     self.count_dms_right += 1
                     marker, = ax_right.plot(event.xdata, event.ydata, 'xr',
                                             markersize=10, markeredgewidth=2)
-                    dm = DraggableMarker(marker, self.right_img, self.count_dms_right)
+                    dm = DraggableMarker(marker, self.img_r, self.count_dms_right)
                     dm.connect()
                     dms_right.append(dm)
 
@@ -42,8 +43,8 @@ class PointPicker(object):
         plt.setp(ax_right.get_yticklabels(), visible=False)
 
         #  display images
-        ax_left.imshow(self.img_l, cmap='Greys_r')
-        ax_right.imshow(self.right_img, cmap='Greys_r')
+        ax_left.imshow(self.img_l)
+        ax_right.imshow(self.img_r)
 
         # Initialize list for storing the DraggableMarkers
         dms_left = DraggableMarkerStack()
